@@ -1,0 +1,8 @@
+{
+  "name": "Remix Remix دبات التلوث ديزل وبنزين",
+  "description": "متجر دبات التلوث وفلاتر البيئة لمركبات الديزل والبنزين مع طلب واتساب وخيارات مخصصة وفيديوهات",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
