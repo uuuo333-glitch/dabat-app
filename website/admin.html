@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11100d"><title>إدارة المتجر</title>
+  <style>
+    :root{color-scheme:dark;--bg:#11100d;--surface:#1b1914;--card:#242117;--gold:#d8b456;--gold2:#f3dda0;--text:#f6f1e5;--muted:#aaa28e;--line:#49412c;font-family:Tahoma,Arial,sans-serif}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);line-height:1.7}button,input,textarea,select{font:inherit}button{cursor:pointer;color:inherit}.wrap{width:min(1200px,calc(100% - 30px));margin:auto}.button{border:1px solid transparent;border-radius:9px;background:var(--gold);color:#17140b;font-weight:bold;padding:9px 14px}.outline{border-color:var(--line);background:var(--surface);color:var(--gold2)}.danger{background:#56221d;color:#ffd9d1}.small{padding:5px 9px;font-size:.82rem}.field{width:100%;border:1px solid var(--line);border-radius:8px;background:#12110e;color:var(--text);padding:9px}.field:focus{outline:2px solid #d8b45666}label{display:grid;gap:4px;color:var(--gold2);font-size:.88rem}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.full{grid-column:1/-1}header{padding:14px 0;border-bottom:1px solid var(--line)}.head{display:flex;align-items:center;justify-content:space-between;gap:15px}.brand{color:var(--gold2);font-size:1.25rem;font-weight:bold}.panel{margin:22px auto;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}.tabs{display:flex;gap:8px;overflow:auto;padding:10px 0 15px}.tab{flex:0 0 auto;padding:8px 13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--muted)}.tab.active{border-color:var(--gold);color:var(--gold2);background:#292416}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.list{display:grid;gap:10px}.item{padding:13px;border:1px solid var(--line);border-radius:10px;background:#15140f}.item h3{margin:0;color:var(--gold2)}.item p{margin:4px 0;color:var(--muted);white-space:pre-line}.hint{padding:10px;border-right:3px solid var(--gold);background:#292416;color:var(--muted);font-size:.85rem}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{padding:15px;border:1px solid var(--line);border-radius:10px}.stat b{display:block;color:var(--gold2);font-size:1.25rem}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.hidden{display:none!important}.toast{position:fixed;bottom:15px;right:50%;transform:translateX(50%);background:#292416;border:1px solid var(--gold);padding:9px 15px;border-radius:9px}.product-row{display:grid;grid-template-columns:65px 1fr auto;gap:10px;align-items:center}.product-row img{width:65px;height:60px;object-fit:cover;border-radius:7px}.privacy{font-size:.8rem;color:var(--muted)}@media(max-width:600px){.grid,.stats{grid-template-columns:1fr}.full{grid-column:auto}.head{align-items:flex-start;flex-direction:column}.panel{padding:13px}.product-row{grid-template-columns:48px 1fr}.product-row img{width:48px;height:48px}.product-row .row{grid-column:2}}
+  </style>
+</head>
+<body>
+  <header><div class="wrap head"><a class="brand" href="#">إدارة المتجر الخاصة</a><div class="row"><a href="index.html" class="button outline">معاينة واجهة العميل</a><a href="employee.html" class="button outline">دخول الموظف</a></div></div></header>
+  <main class="wrap">
+    <section class="panel" id="login-panel"><h1>دخول المالك</h1><p class="hint">رمز PIN حاجز محلي على هذا المتصفح فقط، وليس مصادقة آمنة. يستطيع مستخدم الجهاز أو أدوات المطور الوصول إلى بيانات localStorage. لا تحفظ هنا بيانات مالية أو أسراراً حساسة حقيقية.</p><form id="pin-form" class="grid"><label class="full" id="pin-label">رمز PIN<input class="field" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" required></label><label class="full hidden" id="pin-confirm-label">تأكيد PIN<input class="field" name="confirm" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8"></label><button class="button full" id="pin-submit">دخول</button></form></section>
+    <section id="dashboard" class="hidden">
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-tab="wallet">المحفظة والتوريد</button><button class="tab" data-tab="products">المنتجات والأقسام</button><button class="tab" data-tab="ads">طلبات الإعلانات</button><button class="tab" data-tab="orders">الطلبات والتوصيل</button><button class="tab" data-tab="blog">مدونة التشخيص</button><button class="tab" data-tab="appearance">الثيم والوسائط</button><button class="tab" data-tab="seo">الزيارات و SEO</button><button class="tab" data-tab="payment">الدفع والتواصل</button><button class="tab" data-tab="features">إعدادات إضافية</button><button class="tab" data-tab="employees">الموظفين</button>
+      </div>
+      <section class="panel" id="tab-content"></section>
+      <p class="privacy">تُخزن الإعدادات محلياً في هذا المتصفح فقط. PIN لا يحميها تشفيرياً، وكل تغيير يظهر على واجهة العميل في المتصفح نفسه فقط.</p>
+    </section>
+  </main><div class="toast" id="toast" hidden></div>
+  <script src="media-store.js"></script>
+  <script>
+  "use strict";
+  const K={products:"dabat-store-products-v1",orders:"dabat-store-local-orders-v1",settings:"dabat-store-settings-v1",ads:"dabat-customer-used-ads-v1",requests:"dabat-ad-requests-v1",blog:"dabat-store-blog-v1",activations:"dabat-ad-activations-v1",visits:"dabat-store-visits-v1",searches:"dabat-store-searches-v1",pin:"dabat-owner-pin-v2",wallet:"dabat-store-wallet-v1",employees:"dabat-employee-users-v1"};
+  const base={storeName:"متجر قطع السيارات",announcement:"أهلاً بكم في متجرنا",whatsapp:"966565911414",heroTitle:"كل ما تحتاجه لسيارتك",heroDescription:"منتجات مختارة بعناية.",heroRibbon:"جودة وموثوقية",heroImages:[],heroVideo:"",footerImage:"",footerVideo:"",goldColor:"#d8b456",goldLightColor:"#f3dda0",backgroundColor:"#11100d",bankName:"",beneficiary:"",iban:"",paypal:"",googlePay:"",googlePlay:"",about:"مرحباً بكم في متجرنا.",shipping:"سيتم توصيل الطلبات عبر شركات الشحن المتفق عليها وبأعلى مستوى من الالتزام بالتوقيت.",returns:"تواصل معنا عبر واتساب خلال 7 أيام من استلام المنتج للنظر في طلب الإرجاع وفق حالة المنتج والأنظمة.",buy:"أضف المنتجات إلى السلة، وأكمل بيانات التوصيل، ثم اختر طريقة الدفع.",terms:"تطبق سياسة المتجر على جميع الطلبات، بما في ذلك الدفع وتوصيل المنتجات والتعاملات عبر واتساب.",social:{youtube:"",tiktok:"",snapchat:"",instagram:"",x:"",facebook:""},keywords:[],adDurations:["أسبوع","شهر","3 أشهر","6 أشهر","سنة"],audio:{turbo:"",crackle:"",motorcycle:""},audioSelected:"turbo",audioEnabled:false,storeClosed:false,storeClosedMessage:"المتجر مغلق مؤقتاً، يرجى التواصل عبر واتساب للاستفسار عن المنتجات والخدمات.",visibility:{adMediaUpload:false}};
+  function read(k,d){try{const v=localStorage.getItem(k);return v===null?structuredClone(d):JSON.parse(v)}catch(e){console.error("قراءة التخزين المحلي فشلت",e);return structuredClone(d)}}
+  function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));if(k===K.settings){window.dispatchEvent(new Event("dabat-settings-updated"));}return true}catch(e){console.error("حفظ التخزين المحلي فشل",e);notify("تعذر الحفظ. تحقق من مساحة المتصفح.");return false}}
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const sar=n=>new Intl.NumberFormat("ar-SA",{style:"currency",currency:"SAR",maximumFractionDigits:0}).format(Number(n)||0);
+  const notify=s=>{const t=document.querySelector("#toast");t.textContent=s;t.hidden=false;setTimeout(()=>t.hidden=true,2800)};
+  window.DabatMediaStore.watch(document.body,error=>{console.error("تعذر عرض الوسائط المحفوظة",error);notify("تعذر عرض صورة أو فيديو محفوظ. أعد رفع الملف.")});
+  const defaultProducts=[
+    {id:"cat-001",title:"دبة تلوث بنزين سيراميك أصلية يورو 5",description:"دبة تلوث سيراميك عالية الجودة للسيارات العاملة بالبنزين.",price:1450,category:"دبات بنزين",image:"images/prod_cat_converter_1794448832780.jpg",quantity:20,inStock:true},
+    {id:"dpf-002",title:"فلتر ودبة تلوث ديزل DPF",description:"فلتر ديزل مناسب للشاحنات والسيارات، تحقق من التوافق قبل الطلب.",price:2200,category:"دبات ديزل",image:"images/prod_dpf_diesel_1794448831848.jpg",quantity:12,inStock:true},
+    {id:"sport-003",title:"دبة تلوث معدنية رياضية",description:"دبة معدنية رياضية بتدفق عالٍ.",price:1680,category:"دبات رياضية",image:"images/prod_exhaust_quad_1794448543230.jpg",quantity:8,inStock:true},
+    {id:"ecu-004",title:"جهاز فحص حساسات العادم",description:"جهاز لفحص الحساسات وقراءة رموز الأعطال.",price:850,category:"إلكترونيات وفحص",image:"images/prod_tuning_ecu_1794448742439.jpg",quantity:15,inStock:true}
+  ];
+  const defaultEmployees=[{id:"emp-001",name:"موظف 1",pin:"1234",storeName:"متجر الموظف",theme:{bg:"#11100d",accent:"#d8b456",text:"#f6f1e5"},paypal:"",bankName:"",iban:"",storeOpen:true,blockedServices:[],socials:{instagram:"",tiktok:"",snapchat:"",x:"",facebook:"",youtube:""},whatsapp:"",footerText:"",aboutText:"",paymentMethods:{paypal:true,bank:true},walletEnabled:true,wallet:0,sales:0,products:[]}];
+  let settings={...base,...read(K.settings,{})},products=read(K.products,defaultProducts),orders=read(K.orders,[]),ads=read(K.ads,[]),requests=read(K.requests,[]),blogs=read(K.blog,[]),activations=read(K.activations,[]),wallet=read(K.wallet,{income:0,expenses:[]}),employees=read(K.employees,defaultEmployees),tab="wallet",editingProduct=null,editingBlog=null;
+  const pin=read(K.pin,null);
+  if(pin){document.querySelector("#pin-confirm-label").classList.add("hidden");document.querySelector("#pin-submit").textContent="دخول"}else{document.querySelector("#pin-confirm-label").classList.remove("hidden");document.querySelector("#pin-submit").textContent="إنشاء PIN";}
+  async function digest(text){const bytes=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(text));return [...new Uint8Array(bytes)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+  document.querySelector("#pin-form").onsubmit=async e=>{e.preventDefault();const d=new FormData(e.target),v=String(d.get("pin"));if(!/^\d{4,8}$/.test(v)){notify("أدخل PIN من 4 إلى 8 أرقام");return}try{if(!pin){if(v!==d.get("confirm")){notify("رمزا PIN غير متطابقين");return}const salt=crypto.randomUUID();if(!write(K.pin,{salt,hash:await digest(`${salt}:${v}`)}))return}else if(await digest(`${pin.salt}:${v}`)!==pin.hash){notify("PIN غير صحيح");return}document.querySelector("#login-panel").classList.add("hidden");document.querySelector("#dashboard").classList.remove("hidden");render()}catch(error){console.error("تعذر إعداد رمز المالك",error);notify("تعذر التحقق من PIN. افتح الصفحة عبر HTTP أو HTTPS ومتصفح حديث.")}};
+  document.querySelector(".tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;tab=b.dataset.tab;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()};
+  function render(){({wallet:renderWallet,products:renderProducts,ads:renderAds,orders:renderOrders,blog:renderBlog,appearance:renderAppearance,seo:renderSeo,payment:renderPayment,features:renderStoreControls,employees:renderEmployees}[tab]||renderWallet)()}
+  function bindForm(id,fn){document.querySelector("#"+id)?.addEventListener("submit",e=>{e.preventDefault();fn(new FormData(e.target),e.target)})}
+  function renderWallet(){const expenses=wallet.expenses||[],spent=expenses.reduce((n,x)=>n+Number(x.amount||0),0),profit=Number(wallet.income||0)-spent;document.querySelector("#tab-content").innerHTML=`<h2>المحفظة الخاصة والتوريد السريع</h2><div class="stats"><div class="stat">الرصيد<b>${sar(profit)}</b></div><div class="stat">الأرباح / الإيرادات<b>${sar(wallet.income)}</b></div><div class="stat">المصروفات<b>${sar(spent)}</b></div></div><div class="toolbar"><a class="button outline" target="_blank" rel="noopener" href="https://www.alibaba.com/">علي بابا</a><a class="button outline" target="_blank" rel="noopener" href="https://www.aliexpress.com/">علي إكسبريس</a><a class="button outline" target="_blank" rel="noopener" href="https://www.amazon.sa/">أمازون</a></div><form id="wallet-form" class="grid"><label>إيرادات / أرباح (SAR)<input class="field" name="income" type="number" min="0" step=".01" value="${esc(wallet.income||0)}"></label><label>مصروف جديد (SAR)<input class="field" name="expense" type="number" min="0" step=".01"></label><label class="full">بيان المصروف<input class="field" name="memo"></label><button class="button full">حفظ المحفظة</button></form><hr><h3>المصروفات</h3><div class="list">${expenses.map((x,i)=>`<article class="item"><b>${sar(x.amount)}</b><p>${esc(x.memo)} · ${esc(x.date)}</p><button class="button danger small" data-expense="${i}">حذف</button></article>`).join("")||"لا توجد مصروفات"}</div><p class="hint">رابط المورد الأصلي محفوظ مع المنتج في تبويب المنتجات، ولا يظهر في صفحة العميل.</p>`;bindForm("wallet-form",d=>{wallet.income=Number(d.get("income"))||0;if(Number(d.get("expense"))>0)wallet.expenses.unshift({amount:Number(d.get("expense")),memo:d.get("memo"),date:new Date().toLocaleDateString("ar-SA")});if(write(K.wallet,wallet))notify("تم الحفظ")});document.querySelector("#tab-content").onclick=e=>{const b=e.target.closest("[data-expense]");if(b){wallet.expenses.splice(+b.dataset.expense,1);write(K.wallet,wallet);render()}}}
+  function renderEmployees(){
+    const serviceLabels={products:"المنتجات",sales:"المبيعات",ads:"الإعلانات",chat:"الدردشة",social:"التواصل"};
+    const employeeCards=employees.map((emp)=>{
+      const blocked=Array.isArray(emp.blockedServices)?emp.blockedServices:[];
+      const socials=emp.socials||{};
+      const paymentMethods={paypal:true,bank:true,...(emp.paymentMethods||{})};
+      const walletEnabled=emp.walletEnabled!==false;
+      const servicesHtml=Object.entries(serviceLabels).map(([key,label])=>`<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" data-service-toggle="${emp.id}" data-service="${key}"${blocked.includes(key)?" checked":""}>${label}</label>`).join("");
+      const paymentHtml=`<label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" data-payment-toggle="${emp.id}" data-payment="paypal"${paymentMethods.paypal!==false?" checked":""}>PayPal</label><label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" data-payment-toggle="${emp.id}" data-payment="bank"${paymentMethods.bank!==false?" checked":""}>تحويل بنكي</label><label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" data-wallet-toggle="${emp.id}"${walletEnabled?" checked":""}>المحفظة</label>`;
+      return `
+        <article class="item">
+          <h3>${esc(emp.name)}</h3>
+          <p>اسم المتجر: ${esc(emp.storeName||"متجر الموظف")}</p>
+          <p>حالة المتجر: ${emp.storeOpen===false?"موقوف":"مفتوح"}</p>
+          <p>الدفع: باي بال ${paymentMethods.paypal===false?"مغلق":"مفعل"} · تحويل بنكي ${paymentMethods.bank===false?"مغلق":"مفعل"} · المحفظة ${walletEnabled?"مفعلة":"موقوفة"}</p>
+          <p>PIN: ${esc(emp.pin)}</p>
+          <p>واتساب: ${esc(emp.whatsapp||"-")}</p>
+          <p>التواصل: إنستغرام ${esc(socials.instagram||"-")} · تيك توك ${esc(socials.tiktok||"-")}</p>
+          <p>نص السفل: ${esc(emp.footerText||"-")}</p>
+          <div class="row">
+            <button class="button outline small" data-employee-toggle="${emp.id}">${emp.storeOpen===false?"تشغيل":"إيقاف"}</button>
+            <a class="button outline small" href="employee.html?employee=${esc(emp.id)}" target="_blank">فتح صفحة الموظف</a>
+            <button class="button danger small" data-employee-delete="${emp.id}">حذف</button>
+          </div>
+          <div class="row" style="margin-top:8px">${paymentHtml}${servicesHtml}</div>
+        </article>
+      `;
+    }).join("")||"<p class='muted'>لا يوجد موظفون حتى الآن.</p>";
+    document.querySelector("#tab-content").innerHTML=`<h2>إدارة الموظفين</h2><form id="employee-create-form" class="grid"><label>اسم الموظف (اختياري)<input class="field" name="name" placeholder="اتركه فارغاً لكتابة أي اسم عند الدخول"></label><label>PIN<input class="field" name="pin" type="password" inputmode="numeric" pattern="[0-9]{4,8}" minlength="4" maxlength="8" required></label><label>اسم المتجر<input class="field" name="storeName" value="متجر الموظف" required></label><label>لون الثيم<input class="field" name="themeAccent" type="color" value="#d8b456"></label><label class="full">PayPal / رابط الدفع (اختياري)<input class="field" name="paypal" placeholder="https://paypal.me/..." value=""></label><label>اسم البنك<input class="field" name="bankName" placeholder="بنك ..." value=""></label><label class="full">IBAN / رقم الحساب<input class="field" name="iban" value=""></label><button class="button full">إضافة موظف</button></form><div class="list">${employeeCards}</div>`;
+    document.querySelector("#employee-create-form").onsubmit=(event)=>{event.preventDefault();const data=new FormData(event.target);const emp={id:crypto.randomUUID(),name:String(data.get("name")||"").trim(),pin:String(data.get("pin")||"").trim(),storeName:String(data.get("storeName")||"متجر الموظف").trim(),theme:{bg:"#11100d",accent:String(data.get("themeAccent")||"#d8b456"),text:"#f6f1e5"},paypal:String(data.get("paypal")||"").trim(),bankName:String(data.get("bankName")||"").trim(),iban:String(data.get("iban")||"").trim(),storeOpen:true,blockedServices:[],socials:{instagram:"",tiktok:"",snapchat:"",x:"",facebook:"",youtube:""},whatsapp:"",footerText:"",aboutText:"",paymentMethods:{paypal:true,bank:true},walletEnabled:true,wallet:0,sales:0,products:[]};if(!/^[0-9]{4,8}$/.test(emp.pin)){notify("اكتب PIN من 4 إلى 8 أرقام");return}employees.push(emp);if(write(K.employees,employees)){notify("تم إضافة الموظف");render()}};
+    document.querySelector("#tab-content").onclick=(event)=>{const toggleBtn=event.target.closest("[data-employee-toggle]");if(toggleBtn){const employee=employees.find((item)=>item.id===toggleBtn.dataset.employeeToggle);if(!employee)return;employee.storeOpen = employee.storeOpen === false;write(K.employees,employees);render();return}const paymentToggle=event.target.closest("[data-payment-toggle]");if(paymentToggle){const employee=employees.find((item)=>item.id===paymentToggle.dataset.paymentToggle);if(!employee)return;const method=paymentToggle.dataset.payment;const paymentMethods={...(employee.paymentMethods||{paypal:true,bank:true})};paymentMethods[method]=paymentMethods[method]===false;employee.paymentMethods=paymentMethods;write(K.employees,employees);render();return}const walletToggle=event.target.closest("[data-wallet-toggle]");if(walletToggle){const employee=employees.find((item)=>item.id===walletToggle.dataset.walletToggle);if(!employee)return;employee.walletEnabled = employee.walletEnabled !== false;write(K.employees,employees);render();return}const serviceToggle=event.target.closest("[data-service-toggle]");if(serviceToggle){const employee=employees.find((item)=>item.id===serviceToggle.dataset.serviceToggle);if(!employee)return;const serviceName=serviceToggle.dataset.service;const list=Array.isArray(employee.blockedServices)?employee.blockedServices:[];employee.blockedServices=list.includes(serviceName)?list.filter((item)=>item!==serviceName):[...list,serviceName];write(K.employees,employees);render();return}const deleteBtn=event.target.closest("[data-employee-delete]");if(!deleteBtn)return;const id=deleteBtn.dataset.employeeDelete;employees=employees.filter((e)=>e.id!==id);write(K.employees,employees);render()};
+  }
+  async function fileVal(form,name){const file=form.elements[name]?.files?.[0];return file?window.DabatMediaStore.save(file):""}
+  function renderProducts(){const cats=[...new Set(products.map(p=>p.category).filter(Boolean))];document.querySelector("#tab-content").innerHTML=`<h2>إدارة المنتجات والأقسام والاستيراد</h2><form id="product-form" class="grid"><label>اسم المنتج<input class="field" name="title" required maxlength="160" value="${esc(editingProduct?.title)}"></label><label>القسم<select class="field" name="category">${[...new Set([...cats,"دبات بنزين","دبات ديزل","دبات رياضية","إلكترونيات وفحص","منتجات أخرى"])].map(c=>`<option ${c===editingProduct?.category?"selected":""}>${esc(c)}</option>`).join("")}</select></label><label>قسم جديد<input class="field" name="newCategory" placeholder="اختياري"></label><label>السعر (SAR)<input class="field" name="price" type="number" min="0" required value="${esc(editingProduct?.price)}"></label><label>العدد المتوفر<input class="field" name="quantity" type="number" min="0" value="${esc(editingProduct?.quantity??1)}"></label><label>الصورة<input class="field" name="imageFile" type="file" accept="image/*"></label><label class="full">وصف المنتج<textarea class="field" name="description" required>${esc(editingProduct?.description)}</textarea></label><label class="full">رابط صورة بديل<input class="field" name="imageUrl" value="${esc(editingProduct?.image&&!editingProduct.image.startsWith("data:")?editingProduct.image:"")}"></label><label class="full">رابط المورد الأصلي (سري عن العميل)<input class="field" name="source" value="${esc(editingProduct?.source)}"></label><label class="full">استيراد منتج بالرابط<input class="field" name="importUrl" type="url" placeholder="رابط صفحة المنتج — يُحفظ كمصدر سري"></label><button class="button">${editingProduct?"حفظ التعديل":"إضافة المنتج"}</button>${editingProduct?'<button class="button outline" type="button" id="cancel-edit">إلغاء</button>':""}</form><h3>الأقسام الحالية</h3><div class="row">${cats.map(c=>`<span class="item">${esc(c)} <button class="button danger small" data-category="${esc(c)}">حذف القسم</button></span>`).join("")}</div><div class="row" style="margin-top:12px"><input class="field" id="new-category-name" placeholder="اسم قسم جديد" style="max-width:220px"><button class="button outline" type="button" id="add-category-btn">إضافة قسم</button></div><h3>المنتجات الحالية (${products.length})</h3><div class="list">${products.map(p=>`<article class="item product-row"><img src="${esc(p.image||"")}" alt=""><div><b>${esc(p.title)}</b><p>${esc(p.category)} · ${sar(p.price)} · مخزون ${esc(p.quantity)}</p><p>رابط المصدر: ${esc(p.source||"غير محدد")}</p></div><div class="row"><button class="button outline small" data-edit="${esc(p.id)}">تعديل</button><button class="button danger small" data-delete="${esc(p.id)}">حذف</button></div></article>`).join("")}</div><p class="hint">الاستيراد يحفظ الرابط كمصدر خاص؛ لا يجلب تلقائياً المحتوى والصور من المتاجر الخارجية.</p>`;
+    document.querySelector("#product-form").onsubmit=async e=>{e.preventDefault();try{const d=new FormData(e.target);let image=await fileVal(e.target,"imageFile");if(!image)image=d.get("imageUrl")||editingProduct?.image||"";const selectedCategory=String(d.get("newCategory")).trim()||d.get("category");const p={id:editingProduct?.id||crypto.randomUUID(),title:String(d.get("title")).trim(),description:String(d.get("description")).trim(),price:Number(d.get("price")),quantity:Number(d.get("quantity"))||0,category:selectedCategory,image,source:String(d.get("importUrl")||d.get("source")).trim(),inStock:Number(d.get("quantity"))>0};products=editingProduct?products.map(x=>x.id===p.id?p:x):[p,...products];if(write(K.products,products)){editingProduct=null;notify("تم حفظ المنتج");render()}}catch(err){console.error(err);notify(err.message||"تعذر حفظ المنتج")}};
+    document.querySelector("#cancel-edit")?.addEventListener("click",()=>{editingProduct=null;render()});
+    document.querySelector("#add-category-btn")?.addEventListener("click",()=>{const input=document.querySelector("#new-category-name");const value=String(input?.value||"").trim();if(!value){notify("اكتب اسم القسم أولاً");return}const exists=[...new Set(products.map(p=>p.category).filter(Boolean))].includes(value);if(exists){notify("اسم القسم موجود بالفعل");return}const selector=document.querySelector('select[name="category"]');if(selector){const option=document.createElement("option");option.value=value;option.textContent=value;selector.appendChild(option);selector.value=value;}input.value="";notify("سيُضاف القسم عند حفظ المنتج الأول");});
+    document.querySelector("#tab-content").onclick=e=>{const b=e.target.closest("[data-edit],[data-delete],[data-category]");if(!b)return;if(b.dataset.edit){editingProduct=products.find(x=>x.id===b.dataset.edit);render();return}if(b.dataset.delete&&confirm("حذف المنتج؟")){products=products.filter(x=>x.id!==b.dataset.delete);write(K.products,products);render()}if(b.dataset.category&&confirm("حذف القسم من المنتجات؟")){const category=b.dataset.category;products=products.map(x=>x.category===category?{...x,category:"منتجات أخرى"}:x);write(K.products,products);render()}}}
+  function renderAds(){document.querySelector("#tab-content").innerHTML=`<h2>طلبات الإعلان وتسعيرها وتحديد العدد</h2><div class="list">${requests.map(r=>`<article class="item"><h3>${esc(r.name)} · ${esc(r.type)}</h3><p>${esc(r.location)} · ${esc(r.duration)} · جوال ${esc(r.phone)} · ${esc(r.createdAt)}</p><form class="grid activation-form" data-id="${esc(r.id)}"><label>السعر المتفق عليه (SAR)<input class="field" name="price" type="number" min="0" value="${esc(r.price)}"></label><label>عدد المنتجات (1-25)<input class="field" name="limit" type="number" min="1" max="25" value="${esc(r.limit||2)}" required></label><label>مدة الاشتراك بالأيام<input class="field" name="days" type="number" min="1" value="${esc(r.days||30)}" required></label><label>كود التفعيل<input class="field" name="code" value="${esc(r.code||"")}" placeholder="يُولد تلقائياً عند تركه فارغاً"></label><button class="button">حفظ السعر وتوليد / تحديث التفعيل</button><button type="button" class="button danger" data-request-delete="${esc(r.id)}">حذف الطلب</button></form></article>`).join("")||'<p class="muted">لا توجد طلبات إعلانية بعد.</p>'}<h3>إعلانات المستعمل</h3><div class="list">${ads.map(a=>`<article class="item"><b>${esc(a.name||a.title)}</b><p>${esc(a.location||a.city)} · ${esc(a.description||"")} · الحالة: ${esc(a.status)}</p><div class="row"><button class="button outline small" data-ad-status="${esc(a.id)}" data-status="active">نشر</button><button class="button danger small" data-ad-status="${esc(a.id)}" data-status="مرفوض">رفض</button></div></article>`).join("")}</div>`;
+    document.querySelectorAll(".activation-form").forEach(f=>f.onsubmit=e=>{e.preventDefault();const d=new FormData(f),limit=Number(d.get("limit")),days=Number(d.get("days"));if(limit<1||limit>25||days<1){notify("الحد الأقصى 25 منتجاً، والمدة يجب أن تكون يوماً أو أكثر");return}const r=requests.find(x=>x.id===f.dataset.id);let code=String(d.get("code")).trim()||`AD-${crypto.randomUUID().slice(0,8).toUpperCase()}`;Object.assign(r,{price:Number(d.get("price"))||0,limit,days,code,status:"تمت الموافقة"});activations=activations.filter(x=>x.requestId!==r.id);activations.push({requestId:r.id,code,limit,days,type:r.type,customerId:r.customerId||"",expiresAt:new Date(Date.now()+days*86400000).toISOString()});if(write(K.requests,requests)&&write(K.activations,activations)){notify(`كود التفعيل: ${code}`);render()}});document.querySelector("#tab-content").onclick=e=>{const b=e.target.closest("[data-request-delete],[data-ad-status]");if(b?.dataset.requestDelete){requests=requests.filter(r=>r.id!==b.dataset.requestDelete);write(K.requests,requests);render()}if(b?.dataset.adStatus){ads=ads.map(a=>a.id===b.dataset.adStatus?{...a,status:b.dataset.status}:a);write(K.ads,ads);render()}}}
+  function renderOrders(){document.querySelector("#tab-content").innerHTML=`<h2>الطلبات الواردة وتتبع التوصيل</h2><div class="list">${orders.map(o=>`<article class="item"><h3>${esc(o.number||o.orderNumber)} · ${esc(o.customerName)}</h3><p>الجوال: ${esc(o.phone||o.customerContact)} · العنوان الوطني: ${esc(o.address||"غير مسجل")}</p><p>ملاحظات: ${esc(o.note||"لا توجد")} · الإجمالي: ${sar(o.total)}</p><div class="grid"><label>الحالة<select class="field" data-status="${esc(o.id||o.orderNumber)}">${["جاري العمل","تم الشحن","تم التوصيل"].map(s=>`<option ${s===(o.status||"جاري العمل")?"selected":""}>${s}</option>`).join("")}</select></label><label>الأيام المتبقية<input class="field" data-days="${esc(o.id||o.orderNumber)}" type="number" min="0" value="${esc(o.daysLeft??5)}"></label></div><button class="button small" data-save-order="${esc(o.id||o.orderNumber)}">حفظ حالة التوصيل</button></article>`).join("")||'<p class="muted">لا توجد طلبات.</p>'}</div>`;  document.querySelectorAll("[data-save-order]").forEach(b=>b.onclick=()=>{const id=b.dataset.saveOrder,o=orders.find(x=>(x.id||x.orderNumber)===id);o.status=document.querySelector(`[data-status="${CSS.escape(id)}"]`).value;o.daysLeft=Math.max(0,Number(document.querySelector(`[data-days="${CSS.escape(id)}"]`).value)||0);o.statusUpdatedAt=new Date().toISOString();if(write(K.orders,orders))notify("تم تحديث حالة الطلب")})}
+  function renderBlog(){document.querySelector("#tab-content").innerHTML=`<h2>إدارة مدونة تشخيص الصيانة</h2><form id="blog-form" class="grid"><label>عنوان المقال<input class="field" name="title" required value="${esc(editingBlog?.title)}"></label><label>صورة المقال<input class="field" name="image" type="file" accept="image/*"></label><label class="full">النص<textarea class="field" name="body" required>${esc(editingBlog?.body)}</textarea></label><label class="full">فيديو المقال<input class="field" name="video" type="url" value="${esc(editingBlog?.video)}" placeholder="رابط فيديو مباشر"></label><button class="button">${editingBlog?"حفظ":"نشر المقال"}</button></form><div class="list">${blogs.map(b=>`<article class="item"><h3>${esc(b.title)}</h3><p>${esc(b.body)}</p><button class="button outline small" data-blog-edit="${esc(b.id)}">تعديل</button> <button class="button danger small" data-blog-delete="${esc(b.id)}">حذف</button></article>`).join("")}</div>`;document.querySelector("#blog-form").onsubmit=async e=>{e.preventDefault();try{const d=new FormData(e.target),image=await fileVal(e.target,"image"),item={id:editingBlog?.id||crypto.randomUUID(),title:d.get("title"),body:d.get("body"),video:d.get("video"),image:image||editingBlog?.image||""};blogs=editingBlog?blogs.map(x=>x.id===item.id?item:x):[item,...blogs];if(write(K.blog,blogs)){editingBlog=null;render()}}catch(err){notify(err.message)}};document.querySelector("#tab-content").onclick=e=>{const b=e.target.closest("[data-blog-edit],[data-blog-delete]");if(!b)return;if(b.dataset.blogEdit)editingBlog=blogs.find(x=>x.id===b.dataset.blogEdit);else blogs=blogs.filter(x=>x.id!==b.dataset.blogDelete);write(K.blog,blogs);render()}}
+  function settingsForm(extra=""){return `<form id="settings-form" class="grid">${extra}<label class="full">اسم المتجر<input class="field" name="storeName" value="${esc(settings.storeName)}"></label><label>نص الإعلان العلوي<input class="field" name="announcement" value="${esc(settings.announcement)}"></label><label>رقم واتساب (دولي)<input class="field" name="whatsapp" value="${esc(settings.whatsapp)}"></label><label>عنوان العرض<input class="field" name="heroTitle" value="${esc(settings.heroTitle)}"></label><label>شريط العرض المتحرك<input class="field" name="heroRibbon" value="${esc(settings.heroRibbon)}"></label><label class="full">وصف العرض<textarea class="field" name="heroDescription">${esc(settings.heroDescription)}</textarea></label><label>رابط فيديو الرأس MP4<input class="field" name="heroVideo" value="${esc(settings.heroVideo)}"></label><label>صور العرض العلوية (رابط لكل سطر)<textarea class="field" name="heroImages">${esc((settings.heroImages||[]).join("\n"))}</textarea></label><label>ثواني تبديل الصور العلوية<input class="field" type="number" min="2" name="heroSlideInterval" value="${esc(settings.heroSlideInterval ?? 3)}"></label><label>سرعة دورة الصور العلوية (ثواني)<input class="field" type="number" min="1" name="heroSlideSpeed" value="${esc(settings.heroSlideSpeed ?? 3)}"></label><label>رابط فيديو الفوتر MP4<input class="field" name="footerVideo" value="${esc(settings.footerVideo)}"></label><label>صورة الفوتر<input class="field" name="footerImage" value="${esc(settings.footerImage)}"></label><label>صور الفوتر (رابط لكل سطر)<textarea class="field" name="footerImages">${esc((settings.footerImages||[]).join("\n"))}</textarea></label><label>ثواني تبديل الصور السفلية<input class="field" type="number" min="2" name="footerSlideInterval" value="${esc(settings.footerSlideInterval ?? 5)}"></label><label>سرعة دورة الصور السفلية (ثواني)<input class="field" type="number" min="1" name="footerSlideSpeed" value="${esc(settings.footerSlideSpeed ?? 3)}"></label><div class="full"><div class="panel" style="margin:0;padding:16px;border-radius:12px;background:#1e1a12"><h3 style="margin:0 0 12px;color:var(--gold2)">الكتابات القانونية والصفحات</h3><div class="grid"><label class="full">من نحن<textarea class="field" name="aboutText">${esc(settings.about||'')}</textarea></label><label class="full">سياسة الشحن<textarea class="field" name="shippingText">${esc(settings.shipping||'')}</textarea></label><label class="full">سياسة الإرجاع والاستبدال<textarea class="field" name="returnsText">${esc(settings.returns||'')}</textarea></label><label class="full">الشروط والأحكام<textarea class="field" name="termsText">${esc(settings.terms||'')}</textarea></label><label class="full">طريقة الشراء<textarea class="field" name="buyText">${esc(settings.buy||'')}</textarea></label><label class="full">نص الفوتر<textarea class="field" name="footerText">${esc(settings.footerText||'')}</textarea></label></div></div></div><label>صوت ترحيبي التيربو (رابط صوت)<input class="field" name="audioTurbo" value="${esc(settings.audio?.turbo)}"></label><label>صوت طرطعة السيارة<input class="field" name="audioCrackle" value="${esc(settings.audio?.crackle)}"></label><label>صوت دراجة نارية<input class="field" name="audioMotorcycle" value="${esc(settings.audio?.motorcycle)}"></label><label><span>تفعيل الأصوات الترحيبية <input type="checkbox" name="audioEnabled" ${settings.audioEnabled?"checked":""}></span></label><label class="full"><span>إيقاف المتجر مؤقتاً <input type="checkbox" name="storeClosed" ${settings.storeClosed?"checked":""}></span></label><label class="full">رسالة إيقاف المتجر للعميل<textarea class="field" name="storeClosedMessage">${esc(settings.storeClosedMessage||"المتجر مغلق مؤقتاً، يرجى التواصل عبر واتساب للاستفسار عن المنتجات والخدمات.")}</textarea></label>${["products","ads","blog","orders","support","socials"].map(k=>`<label class="full"><span>إظهار قسم ${({products:"المنتجات",ads:"الإعلانات",blog:"المدونة",orders:"تتبع الطلب",support:"الدردشة",socials:"روابط التواصل"})[k]} للعميل <input type="checkbox" name="show-${k}" ${settings.visibility?.[k]===false?"":"checked"}></span></label>`).join("")}<button class="button full">حفظ الإعدادات</button></form>`}
+  function renderAppearance(){document.querySelector("#tab-content").innerHTML=`<h2>الثيم والكتابات والوسائط والأصوات</h2><p class="hint">الثيم الحالي ذهبي داكن. ضع روابط صور متعددة، وسيعرض الموقع صور العرض بالتتابع حسب الثواني التي تحددها، أو ضع رابط فيديو MP4 بدلاً منها. تُحفظ الملفات المرفوعة في قاعدة بيانات المتصفح، وتُضغط الصور تلقائياً؛ استخدم روابط HTTPS لمقاطع الفيديو المتاحة عبر الإنترنت.</p>${settingsForm()}<hr><form id="media-form" class="grid"><label>رفع صورة عرض<input class="field" type="file" name="heroImage" accept="image/*"></label><label>رفع فيديو الرأس MP4<input class="field" type="file" name="heroVideoFile" accept="video/mp4"></label><label>رفع صورة الفوتر<input class="field" type="file" name="footerImageFile" accept="image/*"></label><label>رفع فيديو الفوتر MP4<input class="field" type="file" name="footerVideoFile" accept="video/mp4"></label><label>رفع صوت التيربو<input class="field" type="file" name="turboFile" accept="audio/*"></label><label>رفع صوت الطرطعة<input class="field" type="file" name="crackleFile" accept="audio/*"></label><label>رفع صوت الدراجة النارية<input class="field" type="file" name="motorcycleFile" accept="audio/*"></label><button class="button full">حفظ الوسائط المرفوعة</button></form>`;document.querySelector("#settings-form").insertAdjacentHTML("beforeend",`<label>لون الذهبي<input class="field" type="color" name="goldColor" value="${esc(settings.goldColor||"#d8b456")}"></label><label>لون الخلفية الداكنة<input class="field" type="color" name="backgroundColor" value="${esc(settings.backgroundColor||"#11100d")}"></label><label>لون الذهبي الفاتح<input class="field" type="color" name="goldLightColor" value="${esc(settings.goldLightColor||"#f3dda0")}"></label><label>لون زر الذكاء الاصطناعي<input class="field" type="color" name="aiButtonColor" value="${esc(settings.aiButtonColor||"#d8b456")}"></label><label>لون نص زر الذكاء الاصطناعي<input class="field" type="color" name="aiTextColor" value="${esc(settings.aiTextColor||"#1a1308")}"></label><label class="full">الصوت الترحيبي المختار<select class="field" name="audioSelected"><option value="turbo" ${settings.audioSelected==="turbo"?"selected":""}>تيربو</option><option value="crackle" ${settings.audioSelected==="crackle"?"selected":""}>طرطعة سيارة</option><option value="motorcycle" ${settings.audioSelected==="motorcycle"?"selected":""}>دراجة نارية</option></select></label>`);bindSettings();document.querySelector("#media-form").onsubmit=async e=>{e.preventDefault();try{const upload=async name=>fileVal(e.target,name);const heroImage=await upload("heroImage"),heroVideo=await upload("heroVideoFile"),footerImage=await upload("footerImageFile"),footerVideo=await upload("footerVideoFile"),turbo=await upload("turboFile"),crackle=await upload("crackleFile"),motorcycle=await upload("motorcycleFile");if(heroImage)settings.heroImages=[...(settings.heroImages||[]),heroImage];if(heroVideo)settings.heroVideo=heroVideo;if(footerImage)settings.footerImage=footerImage;if(footerVideo)settings.footerVideo=footerVideo;settings.audio={...settings.audio,turbo:turbo||settings.audio?.turbo,crackle:crackle||settings.audio?.crackle,motorcycle:motorcycle||settings.audio?.motorcycle};if(write(K.settings,settings))notify("تم حفظ الوسائط")}catch(err){console.error(err);notify(err.message||"تعذر حفظ الوسائط")}}}
+  function bindSettings(){bindForm("settings-form",(d,f)=>{for(const k of ["storeName","announcement","whatsapp","heroTitle","heroRibbon","heroDescription","heroVideo","footerVideo","footerImage","storeClosedMessage","aboutText","shippingText","returnsText","termsText","buyText","footerText"])settings[k]=d.get(k)||"";for(const k of ["goldColor","goldLightColor","backgroundColor","aiButtonColor","aiTextColor"])settings[k]=d.get(k);settings.about=String(d.get("aboutText")||"").trim();settings.shipping=String(d.get("shippingText")||"").trim();settings.returns=String(d.get("returnsText")||"").trim();settings.terms=String(d.get("termsText")||"").trim();settings.buy=String(d.get("buyText")||"").trim();settings.footerText=String(d.get("footerText")||"").trim();settings.heroImages=String(d.get("heroImages")||"").split("\n").map(x=>x.trim()).filter(Boolean);settings.footerImages=String(d.get("footerImages")||"").split("\n").map(x=>x.trim()).filter(Boolean);settings.heroImage=settings.heroImages[0]||"";settings.footerImage=settings.footerImages[0]||"";settings.heroSlideInterval=Math.max(2,Number(d.get("heroSlideInterval"))||3);settings.heroSlideSpeed=Math.max(1,Number(d.get("heroSlideSpeed"))||3);settings.footerSlideInterval=Math.max(2,Number(d.get("footerSlideInterval"))||5);settings.footerSlideSpeed=Math.max(1,Number(d.get("footerSlideSpeed"))||3);settings.audio={turbo:d.get("audioTurbo"),crackle:d.get("audioCrackle"),motorcycle:d.get("audioMotorcycle")};settings.audioSelected=d.get("audioSelected");settings.audioEnabled=f.elements.audioEnabled.checked;settings.storeClosed=f.elements.storeClosed.checked;settings.visibility={...(settings.visibility||{}),...Object.fromEntries(["products","ads","blog","orders","support","socials"].map(k=>[k,f.elements[`show-${k}`].checked]))};if(write(K.settings,settings))notify("تم حفظ الإعدادات")})}
+  function renderSeo(){const visits=read(K.visits,{}),searches=read(K.searches,[]),count=Object.values(visits).reduce((a,b)=>a+Number(b||0),0);const keywordList=Array.isArray(settings.keywords)?settings.keywords:String(settings.keywords||"").split(/[\n,،]+/).map(item=>item.trim()).filter(Boolean);document.querySelector("#tab-content").innerHTML=`<h2>إحصائيات الزوار وكلمات البحث و SEO</h2><div class="stats"><div class="stat">زيارات المتصفح المسجلة<b>${count}</b></div><div class="stat">عمليات بحث مسجلة<b>${searches.length}</b></div><div class="stat">طلبات إعلانات<b>${requests.length}</b></div></div><h3>كلمات البحث الأخيرة</h3><div class="list">${searches.slice(-30).reverse().map(x=>`<article class="item">${esc(x.term)} <span class="muted">${esc(new Date(x.at).toLocaleString("ar-SA"))}</span></article>`).join("")}</div><form id="seo-form" class="grid"><div class="full"><label>كلمات مفتاحية (أضف أو احذف أي كلمة)</label><div class="row" id="keyword-list">${keywordList.map((word,index)=>`<span class="item">${esc(word)} <button type="button" class="button danger small" data-keyword-remove="${esc(index)}">حذف</button></span>`).join("")||'<span class="muted">لا توجد كلمات مفتاحية</span>'}</div></div><label class="full">إضافة كلمة جديدة<input class="field" id="keyword-input" maxlength="50"></label><button type="button" class="button outline full" id="keyword-add">إضافة كلمة مفتاحية</button><label class="full">Meta Description<textarea class="field" name="description">${esc(settings.metaDescription||"")}</textarea></label><button class="button full">حفظ SEO</button></form><p class="hint">عداد الزيارات محلي لهذا المتصفح، وليس تحليلات عامة موثوقة. ظهور الكلمات في جوجل يعتمد على فهرسة الموقع.</p>`;document.querySelector("#keyword-add").onclick=()=>{const input=document.querySelector("#keyword-input"),value=String(input.value||"").trim();if(!value){notify("اكتب كلمة مفتاحية أولاً");return}const list=Array.isArray(settings.keywords)?settings.keywords:keywordList;const existing=list.map(item=>String(item).trim());if(existing.includes(value)){notify("الكلمة موجودة بالفعل");return}list.push(value);settings.keywords=list;if(write(K.settings,settings))renderSeo();input.value=""};document.querySelector("#keyword-list")?.addEventListener("click",e=>{const button=e.target.closest("[data-keyword-remove]");if(!button)return;const list=Array.isArray(settings.keywords)?settings.keywords:keywordList;list.splice(Number(button.dataset.keywordRemove),1);settings.keywords=list;if(write(K.settings,settings))renderSeo()});bindForm("seo-form",d=>{settings.metaDescription=d.get("description");settings.keywords=(Array.isArray(settings.keywords)?settings.keywords:keywordList).filter(Boolean);if(write(K.settings,settings))document.querySelector('meta[name="description"]')?.setAttribute("content",settings.metaDescription);notify("تم حفظ الكلمات المفتاحية")})}
+  function renderPayment(){document.querySelector("#tab-content").innerHTML=`<h2>إعدادات الدفع والتواصل والفوتر</h2><form id="payment-form" class="grid"><label>اسم البنك<input class="field" name="bankName" value="${esc(settings.bankName)}"></label><label>اسم المستفيد<input class="field" name="beneficiary" value="${esc(settings.beneficiary)}"></label><label class="full">IBAN<input class="field" name="iban" value="${esc(settings.iban)}"></label><label>رابط PayPal<input class="field" name="paypal" value="${esc(settings.paypal)}"></label><label>رابط Google Pay<input class="field" name="googlePay" value="${esc(settings.googlePay)}"></label><label>رابط Google Play<input class="field" name="googlePlay" value="${esc(settings.googlePlay)}"></label>${Object.entries({youtube:"يوتيوب",tiktok:"تيك توك",snapchat:"سناب شات",instagram:"إنستغرام",x:"إكس",facebook:"فيسبوك"}).map(([k,n])=>`<label>رابط ${n}<input class="field" name="${k}" value="${esc(settings.social?.[k])}"></label>`).join("")}<label class="full">من نحن<textarea class="field" name="about">${esc(settings.about)}</textarea></label><label class="full">طريقة الشراء<textarea class="field" name="buy">${esc(settings.buy)}</textarea></label><label class="full">سياسة الشحن<textarea class="field" name="shipping">${esc(settings.shipping)}</textarea></label><label class="full">سياسة الإرجاع والاستبدال<textarea class="field" name="returns">${esc(settings.returns)}</textarea></label><label class="full">الشروط والأحكام<textarea class="field" name="terms">${esc(settings.terms)}</textarea></label><label class="full">نص إضافي في أسفل الصفحة<textarea class="field" name="footerText">${esc(settings.footerText)}</textarea></label><button class="button full">حفظ بيانات الدفع والتواصل</button></form>`;document.querySelector("#payment-form").insertAdjacentHTML("beforeend",`<label class="full">صفحات إضافية، سطر لكل صفحة بصيغة: العنوان | النص<textarea class="field" name="customPages">${esc((settings.customPages||[]).map(p=>`${p.title} | ${p.content}`).join("\n"))}</textarea></label>`);bindForm("payment-form",d=>{for(const k of ["bankName","beneficiary","iban","paypal","googlePay","googlePlay","about","buy","shipping","returns","terms","footerText"])settings[k]=d.get(k);settings.social=Object.fromEntries(["youtube","tiktok","snapchat","instagram","x"].map(k=>[k,d.get(k)]));settings.customPages=String(d.get("customPages")||"").split("\n").map(line=>{const [title,...content]=line.split("|");return{title:title.trim(),content:content.join("|").trim()}}).filter(p=>p.title);if(write(K.settings,settings))notify("تم الحفظ")})}
+  function renderStoreControls(){document.querySelector("#tab-content").innerHTML=`<h2>إعدادات المتجر الإضافية</h2><p class="hint">هذه الإعدادات محفوظة محلياً في هذا المتصفح، ويجب فتح واجهة العميل ولوحة المالك على نفس النطاق والمتصفح.</p><form id="store-controls" class="grid"><label>أقصى مدة تجهيز الطلب (أيام)<input class="field" type="number" name="maxPreparationDays" min="1" max="60" required value="${esc(settings.maxPreparationDays??16)}"></label><label>سرعة الشريط العلوي (ثوانٍ للدورة)<input class="field" type="number" name="tickerSpeedSeconds" min="5" max="120" required value="${esc(settings.tickerSpeedSeconds??23)}"></label><label class="full">شركات الشحن (اسم لكل سطر)<textarea class="field" name="shippingCompanies">${esc((settings.shippingCompanies||["سبل","سمسا","أرامكس"]).join("\n"))}</textarea></label><label>كود الخصم<input class="field" name="couponCode" maxlength="32" value="${esc(settings.couponCode||"")}"></label><label>نسبة الخصم (%)<input class="field" type="number" name="couponPercent" min="0" max="100" value="${esc(settings.couponPercent??0)}"></label><label>الثيم<select class="field" name="themeName"><option value="dark-gold" ${settings.themeName!=="light"&&settings.themeName!=="charcoal"?"selected":""}>ذهبي داكن</option><option value="charcoal" ${settings.themeName==="charcoal"?"selected":""}>فحمي</option><option value="light" ${settings.themeName==="light"?"selected":""}>فاتح</option></select></label><label>رابط فيسبوك<input class="field" type="url" name="facebook" value="${esc(settings.social?.facebook||"")}"></label><label class="full"><span>إظهار خيار الاشتراك والإعلان للعميل <input type="checkbox" name="subscriptionVisible" ${settings.subscriptionVisible===false?"":"checked"}></span></label><button class="button full">حفظ الإعدادات الإضافية</button></form><hr><h3>ملاحظات حول استيراد المنتجات</h3><p class="hint">يمكن حفظ رابط المورد كمصدر خاص وإدخال الصورة والنوع والعدد والطول والعرض يدوياً. استيراد المحتوى آلياً من مواقع خارجية يتطلب واجهة API أو خادماً وسيطاً يسمح به الموقع المصدر؛ لا يمكن ضمانه من صفحة ثابتة بسبب قيود CORS.</p>`;document.querySelector("#store-controls").onsubmit=e=>{e.preventDefault();const d=new FormData(e.target),days=Number(d.get("maxPreparationDays")),speed=Number(d.get("tickerSpeedSeconds")),percent=Number(d.get("couponPercent"));if(!Number.isInteger(days)||days<1||days>60||!Number.isInteger(speed)||speed<5||speed>120||!Number.isFinite(percent)||percent<0||percent>100){notify("تحقق من مدة التجهيز (1-60) وسرعة الشريط (5-120) ونسبة الخصم (0-100)");return}settings.maxPreparationDays=days;settings.tickerSpeedSeconds=speed;settings.shippingCompanies=[...new Set(String(d.get("shippingCompanies")||"").split("\n").map(x=>x.trim()).filter(Boolean))];settings.couponCode=String(d.get("couponCode")||"").trim();settings.couponPercent=percent;settings.themeName=d.get("themeName");settings.subscriptionVisible=e.target.elements.subscriptionVisible.checked;settings.social={...(settings.social||{}),facebook:String(d.get("facebook")||"").trim()};if(write(K.settings,settings))notify("تم حفظ الإعدادات الإضافية")}}
+  const originalRenderProducts=renderProducts;
+  renderProducts=function(){originalRenderProducts();const form=document.querySelector("#product-form");if(!form)return;form.insertAdjacentHTML("beforeend",`<label>النوع الظاهر للعميل<input class="field" name="productType" maxlength="100" value="${esc(editingProduct?.productType||"")}"></label><label>الطول (سم)<input class="field" name="length" type="number" min="0" step="0.1" value="${esc(editingProduct?.length||"")}"></label><label>العرض (سم)<input class="field" name="width" type="number" min="0" step="0.1" value="${esc(editingProduct?.width||"")}"></label><label><span>منتج مستورد / يعرض بيانات مختصرة <input type="checkbox" name="imported" ${editingProduct?.imported?"checked":""}></span></label>`);const editId=editingProduct?.id;form.addEventListener("submit",()=>{const d=new FormData(form),id=editId||products[0]?.id,p=products.find(x=>x.id===id);if(!p)return;p.productType=String(d.get("productType")||"").trim();p.length=Number(d.get("length"))||0;p.width=Number(d.get("width"))||0;p.imported=d.get("imported")==="on";write(K.products,products)})};
+  const locationRenderProducts=renderProducts;
+  renderProducts=function(){locationRenderProducts();const form=document.querySelector("#product-form");if(!form)return;form.insertAdjacentHTML("beforeend",`<label class="full">عنوان / موقع المنتج<input class="field" name="productLocation" maxlength="160" value="${esc(editingProduct?.location||"")}"></label>`);const editId=editingProduct?.id;form.addEventListener("submit",()=>{const d=new FormData(form),id=editId||products[0]?.id,product=products.find(item=>item.id===id);if(product){product.location=String(d.get("productLocation")||"").trim();write(K.products,products)}})};
+  const originalRenderAds=renderAds;
+  renderAds=function(){originalRenderAds();document.querySelectorAll(".activation-form").forEach(form=>{const request=requests.find(item=>item.id===form.dataset.id);if(!request||request.type!=="مطعم / مقهى")return;const daysByPlan={daily:1,monthly:30,yearly:365};form.insertAdjacentHTML("beforeend",`<label>باقة الإعلان<select class="field" name="adPlan"><option value="daily">يومي</option><option value="monthly">شهري</option><option value="yearly">سنوي</option></select></label>`);const plan=form.elements.adPlan;plan.value=request.plan||"monthly";form.elements.days.value=daysByPlan[plan.value];plan.onchange=()=>{form.elements.days.value=daysByPlan[plan.value]};const submit=form.onsubmit;form.onsubmit=e=>{request.plan=plan.value;form.elements.days.value=daysByPlan[plan.value];submit.call(form,e);const activation=activations.find(item=>item.requestId===request.id);if(activation){activation.plan=plan.value;write(K.activations,activations)}}});document.querySelectorAll("[data-ad-status]").forEach(button=>{const row=button.closest(".item"),id=button.dataset.adStatus;if(!row)return;const ad=ads.find(x=>x.id===id);if(!ad)return;const controls=button.parentElement;if(!row.querySelector(`[data-pause-ad="${CSS.escape(id)}"]`))controls.insertAdjacentHTML("beforeend",`<button class="button ${ad.status==="paused"?"green":"outline"} small" data-pause-ad="${esc(id)}">${ad.status==="paused"?"استئناف الإعلان":"إيقاف الإعلان"}</button>`);if(!row.querySelector(`[data-payment-confirm="${CSS.escape(id)}"]`))controls.insertAdjacentHTML("beforeend",`<button class="button ${ad.contactVisible?"green":"outline"} small" data-payment-confirm="${esc(id)}">${ad.contactVisible?"تم تأكيد الدفع · إخفاء التواصل":"تأكيد الدفع وإظهار التواصل"}</button>`);if(ad.contactVisible&&!row.querySelector("[data-contact-paid]"))row.insertAdjacentHTML("afterbegin",'<p data-contact-paid>الدفع مؤكد، بيانات التواصل ظاهرة للعميل.</p>')});const content=document.querySelector("#tab-content"),previous=content.onclick;content.onclick=e=>{const pause=e.target.closest("[data-pause-ad]"),payment=e.target.closest("[data-payment-confirm]");if(!pause&&!payment){previous?.(e);return}const id=(pause||payment).dataset.pauseAd||(pause||payment).dataset.paymentConfirm,ad=ads.find(x=>x.id===id);if(!ad)return;if(payment){if(!ad.contactVisible&&!confirm("تأكيد استلام قيمة الاشتراك وإظهار رقم التواصل للعملاء؟"))return;ad.contactVisible=!ad.contactVisible}else ad.status=ad.status==="paused"?"active":"paused";if(write(K.ads,ads)){notify(payment?(ad.contactVisible?"تم تأكيد الدفع وإظهار التواصل":"تم إخفاء بيانات التواصل"):(ad.status==="paused"?"تم إيقاف الإعلان":"تم استئناف الإعلان"));render()}}};
+  const originalRenderOrders=renderOrders;
+  renderOrders=function(){originalRenderOrders();document.querySelectorAll("[data-save-order]").forEach(button=>{const id=button.dataset.saveOrder,order=orders.find(x=>(x.id||x.orderNumber)===id);if(!order)return;const select=document.createElement("select");select.className="field";const companies=Array.isArray(settings.shippingCompanies)&&settings.shippingCompanies.length?settings.shippingCompanies:["سبل","سمسا","أرامكس"];select.innerHTML=companies.map(name=>`<option ${name===order.shippingCompany?"selected":""}>${esc(name)}</option>`).join("");const label=document.createElement("label");label.textContent="شركة الشحن";label.append(select);button.before(label);const save=button.onclick;button.onclick=()=>{save?.();order.shippingCompany=select.value;write(K.orders,orders)}})};
+  const originalRenderStoreControls=renderStoreControls;
+  renderStoreControls=function(){originalRenderStoreControls();const form=document.querySelector("#store-controls"),standard=new Set(["youtube","tiktok","snapchat","instagram","x","facebook"]);form.insertAdjacentHTML("beforeend",`<label class="full">روابط تواصل إضافية (سطر لكل رابط: الاسم | URL)<textarea class="field" name="socialExtras">${esc(Object.entries(settings.social||{}).filter(([name,url])=>url&&!standard.has(name)).map(([name,url])=>`${name} | ${url}`).join("\n"))}</textarea></label>`);const save=form.onsubmit;form.onsubmit=e=>{save.call(form,e);const extras=String(new FormData(form).get("socialExtras")||"").split("\n").map(line=>{const [name,...url]=line.split("|");return[name.trim(),url.join("|").trim()]}).filter(([name,url])=>name&&url);settings.social={...(settings.social||{})};for(const key of Object.keys(settings.social))if(!standard.has(key))delete settings.social[key];for(const [name,url] of extras)settings.social[name]=url;write(K.settings,settings)}};
+  const requestDetailsRenderAds=renderAds;
+  renderAds=function(){requestDetailsRenderAds();document.querySelectorAll(".activation-form").forEach(form=>{const request=requests.find(item=>item.id===form.dataset.id);if(!request||(!request.city&&!request.region&&!request.description&&!request.vehicleImage))return;const detail=document.createElement("div");detail.className="item";detail.textContent=[request.city,request.region,request.description].filter(Boolean).join(" · ");if(request.vehicleImage){const image=document.createElement("img");image.src=request.vehicleImage;image.alt="صورة مرفقة بطلب الإعلان";image.style.maxWidth="220px";image.style.maxHeight="160px";detail.append(image)}form.before(detail)})};
+  const detailedStoreControls=renderStoreControls;
+  renderStoreControls=function(){detailedStoreControls();const form=document.querySelector("#store-controls"),visibility=settings.visibility||{},services=settings.digitalServices||[{title:"إنجاز معاملات المؤسسات والشركات",description:"نساعدك في الوصول إلى الخدمات المناسبة لمؤسستك."},{title:"تأمين السيارات",description:"استفسر عن خيارات التأمين المتاحة."},{title:"الخدمات الإلكترونية العامة",description:"اطلب المساعدة في الخدمات الإلكترونية."}],checks=[["productImage","صورة المنتج"],["productName","اسم المنتج"],["productAddress","عنوان المنتج"],["productDescription","وصف المنتج"],["productPrice","السعر"],["purchase","زر الشراء"],["share","مشاركة المنتج"],["whatsapp","زر واتساب"],["chat","الدردشة المباشرة"],["shipping","معلومات الشحن"],["tracking","بيانات التتبع"],["paymentReceipt","إرفاق إيصال الدفع"],["digitalServices","الخدمات الإلكترونية"],["googleProducts","بيانات المنتجات لمحركات البحث"],["ownerLogin","أيقونة دخول المالك"]];form.insertAdjacentHTML("beforeend",`<hr><label>أيقونة المتجر (رمز أو إيموجي)<input class="field" name="brandIcon" maxlength="8" value="${esc(settings.brandIcon||"🛍️")}"></label><label class="full">الخدمات الإلكترونية العامة (سطر لكل خدمة: الاسم | الوصف)<textarea class="field" name="digitalServices">${esc(services.map(service=>`${service.title} | ${service.description}`).join("\n"))}</textarea></label><h3 class="full">إظهار/إخفاء عناصر واجهة العميل</h3>${checks.map(([key,label])=>`<label class="full"><span>إظهار ${label} <input type="checkbox" name="visible-${key}" ${visibility[key]===false?"":"checked"}></span></label>`).join("")}`);const oldSubmit=form.onsubmit;form.onsubmit=e=>{oldSubmit.call(form,e);settings.brandIcon=String(new FormData(form).get("brandIcon")||"").trim();settings.digitalServices=String(new FormData(form).get("digitalServices")||"").split("\n").map(line=>{const [title,...description]=line.split("|");return{title:title.trim(),description:description.join("|").trim()}}).filter(service=>service.title).slice(0,20);settings.visibility={...(settings.visibility||{}),...Object.fromEntries(checks.map(([key])=>[key,form.elements[`visible-${key}`].checked]))};write(K.settings,settings)}};
+  const detailedRenderOrders=renderOrders;
+  renderOrders=function(){detailedRenderOrders();document.querySelectorAll("[data-save-order]").forEach(button=>{const id=button.dataset.saveOrder,order=orders.find(item=>(item.id||item.orderNumber)===id);if(!order)return;const status=document.querySelector(`[data-status="${CSS.escape(id)}"]`);if(status){const choices=["جاري العمل","بانتظار الدفع","تم الدفع","قيد التجهيز","تم الشحن","تم التوصيل"];status.innerHTML=choices.map(value=>`<option ${value===(order.status||"جاري العمل")?"selected":""}>${value}</option>`).join("")}const fields=document.createElement("div");fields.className="grid";fields.innerHTML=`<label><span>تم تأكيد الدفع <input type="checkbox" data-paid="${esc(id)}" ${order.paid?"checked":""}></span></label><label class="full">رمز تتبع الشحنة<input class="field" data-tracking-code="${esc(id)}" value="${esc(order.trackingCode||"")}"></label><label><span>إظهار التتبع للمشتري فقط <input type="checkbox" data-tracking-visible="${esc(id)}" ${order.trackingVisible?"checked":""}></span></label>`;button.before(fields);if(order.paymentReceipt){const receipt=document.createElement("a");receipt.className="button outline small";receipt.href=order.paymentReceipt;receipt.target="_blank";receipt.rel="noopener";receipt.textContent="عرض إيصال الدفع";fields.after(receipt)}const previous=button.onclick;button.onclick=()=>{previous?.();order.paid=document.querySelector(`[data-paid="${CSS.escape(id)}"]`).checked;order.trackingCode=document.querySelector(`[data-tracking-code="${CSS.escape(id)}"]`).value.trim();order.trackingVisible=document.querySelector(`[data-tracking-visible="${CSS.escape(id)}"]`).checked;if(order.paid&&["بانتظار الدفع","جاري العمل","قيد التجهيز"].includes(order.status))order.status="تم الدفع";if(write(K.orders,orders))notify("تم حفظ الدفع وبيانات التتبع")}})};
+  const paymentSettingsRender=renderPayment;
+  renderPayment=function(){paymentSettingsRender();const form=document.querySelector("#payment-form"),pages=form.elements.customPages;form.insertAdjacentHTML("beforeend",'<p class="hint full">يمكنك إضافة ثلاث صفحات مخصصة كحد أقصى. كل سطر بصيغة: العنوان | النص</p>');form.addEventListener("submit",()=>{const entries=String(new FormData(form).get("customPages")||"").split("\n").map(line=>{const [title,...content]=line.split("|");return{title:title.trim(),content:content.join("|").trim()}}).filter(page=>page.title);if(entries.length>3){settings.customPages=entries.slice(0,3);write(K.settings,settings);pages.value=settings.customPages.map(page=>`${page.title} | ${page.content}`).join("\n");notify("تم حفظ أول ثلاث صفحات فقط")}})};
+  const ownerWalletRender=renderWallet;
+  renderWallet=function(){ownerWalletRender();wallet.withdrawals=Array.isArray(wallet.withdrawals)?wallet.withdrawals:[];const spent=(wallet.expenses||[]).reduce((sum,item)=>sum+Number(item.amount||0),0),net=Number(wallet.income||0)-spent,withdrawn=wallet.withdrawals.reduce((sum,item)=>sum+Number(item.amount||0),0),available=Math.max(0,net-withdrawn),content=document.querySelector("#tab-content");content.insertAdjacentHTML("beforeend",`<hr><h3>السحب البنكي — للمالك</h3><p class="hint">صافي الأرباح لا يشمل التحويلات المسجلة. تسجيل السحب هنا للتوثيق فقط ولا ينفذ حوالة بنكية تلقائياً. المتاح للسحب: <b>${sar(available)}</b></p><form id="owner-withdrawal" class="grid"><label>المبلغ (SAR)<input class="field" name="amount" type="number" min="0.01" max="${esc(available)}" step="0.01" required></label><label>اسم البنك<input class="field" name="bank" value="${esc(settings.bankName||"")}" required></label><label>المستفيد<input class="field" name="beneficiary" value="${esc(settings.beneficiary||"")}" required></label><label class="full">IBAN<input class="field" name="iban" value="${esc(settings.iban||"")}" required></label><label class="full">رقم مرجع التحويل (اختياري)<input class="field" name="reference" maxlength="100"></label><button class="button full">تسجيل السحب البنكي</button></form><h3>السحوبات المسجلة (${wallet.withdrawals.length})</h3><div class="list">${wallet.withdrawals.map((item,index)=>`<article class="item"><b>${sar(item.amount)}</b><p>${esc(item.bank)} · ${esc(item.beneficiary)} · ${esc(item.date)}${item.reference?` · مرجع: ${esc(item.reference)}`:""}</p><button class="button danger small" data-withdrawal-delete="${index}">حذف التسجيل</button></article>`).join("")||'<p class="muted">لا توجد سحوبات مسجلة.</p>'}</div>`);document.querySelector("#owner-withdrawal").onsubmit=e=>{e.preventDefault();const data=new FormData(e.target),amount=Number(data.get("amount"));if(!Number.isFinite(amount)||amount<=0||amount>available){notify("أدخل مبلغاً موجباً لا يتجاوز المتاح للسحب");return}wallet.withdrawals.unshift({amount,bank:String(data.get("bank")).trim(),beneficiary:String(data.get("beneficiary")).trim(),iban:String(data.get("iban")).trim(),reference:String(data.get("reference")||"").trim(),date:new Date().toLocaleDateString("ar-SA")});if(write(K.wallet,wallet)){notify("تم تسجيل السحب");render()}};content.addEventListener("click",e=>{const button=e.target.closest("[data-withdrawal-delete]");if(!button)return;wallet.withdrawals.splice(Number(button.dataset.withdrawalDelete),1);if(write(K.wallet,wallet))render()})};
+  const ownerProductRender=renderProducts;
+  renderProducts=function(){ownerProductRender();const form=document.querySelector("#product-form");if(!form||form.querySelector("#fetch-product-details"))return;const source=form.elements.importUrl;form.insertAdjacentHTML("beforeend",`<button class="button outline full" type="button" id="fetch-product-details">جلب بيانات المنتج من الرابط</button><p class="hint full" id="product-import-status">يجلب الاسم والوصف والصورة والسعر إن كان بالريال السعودي. عدّل السعر في خانة SAR قبل الحفظ. لا يظهر رابط المورد للعميل.</p>`);document.querySelector("#fetch-product-details").onclick=async()=>{const status=document.querySelector("#product-import-status");let url;try{url=new URL(String(source.value||"").trim());if(url.protocol!=="https:"||url.username||url.password||!url.hostname.includes(".")||url.hostname==="localhost"||url.hostname.endsWith(".local")||url.hostname.includes(":")||/^\\d+(?:\\.\\d+){3}$/.test(url.hostname))throw Error("أدخل رابط متجر عام يبدأ بـ https://");}catch(error){status.textContent=error.message||"رابط المنتج غير صالح";return}status.textContent="جارٍ قراءة بيانات صفحة المنتج…";const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);try{const response=await fetch(url.href,{mode:"cors",credentials:"omit",redirect:"follow",referrerPolicy:"no-referrer",signal:controller.signal});if(!response.ok)throw Error(`تعذر جلب الصفحة (HTTP ${response.status})`);const type=response.headers.get("content-type")||"";if(!type.includes("text/html"))throw Error("الرابط لا يشير إلى صفحة HTML");const html=await response.text();if(html.length>2_000_000)throw Error("حجم صفحة المنتج أكبر من الحد المسموح");const doc=new DOMParser().parseFromString(html,"text/html"),meta=(...selectors)=>{for(const selector of selectors){const value=doc.querySelector(selector)?.getAttribute("content")?.trim();if(value)return value}return""},title=meta('meta[property="og:title"]','meta[name="twitter:title"]','meta[name="title"]')||doc.querySelector("title")?.textContent?.trim()||"",description=meta('meta[property="og:description"]','meta[name="description"]','meta[name="twitter:description"]'),image=meta('meta[property="og:image"]','meta[name="twitter:image"]'),amount=meta('meta[property="product:price:amount"]','meta[property="og:price:amount"]','meta[itemprop="price"]'),currency=meta('meta[property="product:price:currency"]','meta[property="og:price:currency"]','meta[itemprop="priceCurrency"]').toUpperCase();if(title)form.elements.title.value=title.slice(0,160);if(description)form.elements.description.value=description;if(image){const imageUrl=new URL(image,url);if(["https:","http:"].includes(imageUrl.protocol))form.elements.imageUrl.value=imageUrl.href}if(amount&&currency==="SAR"){const price=Number(amount.replace(/[^\d.,]/g,"").replace(/,(?=\\d{3}(?:\\D|$))/g,"").replace(",", "."));if(Number.isFinite(price)&&price>=0)form.elements.price.value=price}form.elements.source.value=url.href;status.textContent=`تم جلب البيانات المتاحة${title?" للاسم":""}${description?" والوصف":""}${image?" والصورة":""}. تحقق منها وحدد السعر النهائي بالريال السعودي.`}catch(error){console.error("تعذر استيراد بيانات المنتج",error);status.textContent=error.name==="AbortError"?"انتهت مهلة الاتصال. حاول مجدداً.":error.message==="Failed to fetch"?"رفض المتجر الاتصال المباشر (CORS). أدخل البيانات يدوياً أو استخدم رابط متجر يسمح بالقراءة.":error.message||"تعذر استيراد بيانات المنتج"}finally{clearTimeout(timer)}}};
+  const ownerAdsRender=renderAds;
+  renderAds=function(){ownerAdsRender();document.querySelectorAll("[data-ad-status]").forEach(button=>{const ad=ads.find(item=>item.id===button.dataset.adStatus),row=button.closest(".item");if(!ad||!row||row.querySelector(".owner-ad-media"))return;const form=document.createElement("form");form.className="grid owner-ad-media";form.innerHTML=`<label class="full">صورة الإعلان (رابط)<input class="field" name="imageUrl" value="${esc(ad.image||"")}"></label><label class="full">رفع صورة<input class="field" name="imageFile" type="file" accept="image/*"></label><label class="full">رابط فيديو الإعلان (HTTPS)<input class="field" name="videoUrl" type="url" value="${esc(ad.video||"")}" placeholder="https://..."></label><button class="button outline full">حفظ وسائط الإعلان</button>`;row.append(form);form.onsubmit=async event=>{event.preventDefault();try{const file=form.elements.imageFile.files?.[0];if(file&&!file.type.startsWith("image/"))throw Error("اختر ملف صورة صالحاً");let image=String(new FormData(form).get("imageUrl")||"").trim();if(file)image=await fileVal(form,"imageFile");else if(image){const parsed=new URL(image,location.href);if(!["https:","http:"].includes(parsed.protocol))throw Error("رابط الصورة يجب أن يكون HTTP أو HTTPS")}const video=String(new FormData(form).get("videoUrl")||"").trim();if(video&&new URL(video).protocol!=="https:")throw Error("رابط الفيديو يجب أن يبدأ بـ HTTPS");ad.image=image;ad.video=video;if(write(K.ads,ads)){notify("تم حفظ وسائط الإعلان");render()}}catch(error){console.error("تعذر حفظ وسائط الإعلان",error);notify(error.message||"تعذر حفظ وسائط الإعلان")}}})};
+  const ownerAdsRequestPreview=renderAds;
+  renderAds=function(){ownerAdsRequestPreview();document.querySelectorAll(".activation-form").forEach(form=>{const request=requests.find(item=>item.id===form.dataset.id);const restaurantImages=Array.isArray(request?.restaurantImages)?request.restaurantImages:[];const hasMedia=Boolean(request?.adImage||request?.adVideo||restaurantImages.some(Boolean)||request?.restaurantVideo);if(!request||!hasMedia)return;const preview=document.createElement("div");preview.className="item";preview.textContent="وسائط طلب الإعلان";if(request.adImage){const image=document.createElement("img");image.src=request.adImage;image.alt="صورة مرفقة بطلب الإعلان";image.style.maxWidth="220px";image.style.maxHeight="160px";image.style.objectFit="contain";preview.append(image)}restaurantImages.forEach((imageSrc,index)=>{if(!imageSrc)return;const image=document.createElement("img");image.src=imageSrc;image.alt=`صورة إعلان مطعم ${index+1}`;image.style.maxWidth="220px";image.style.maxHeight="160px";image.style.objectFit="contain";preview.append(image)});if(request.adVideo||request.restaurantVideo){const video=document.createElement("video");video.controls=true;video.src=request.adVideo||request.restaurantVideo;video.style.maxWidth="320px";preview.append(video)}form.before(preview)})};
+  const ownerWalletLabel=renderWallet;
+  renderWallet=function(){ownerWalletLabel();const label=document.querySelector("#tab-content .stats .stat");if(label?.firstChild)label.firstChild.textContent="صافي الأرباح (SAR)"};
+  document.addEventListener("click",event=>{const button=event.target instanceof Element?event.target.closest("[data-withdrawal-delete]"):null;if(!button)return;event.preventDefault();event.stopImmediatePropagation();wallet.withdrawals.splice(Number(button.dataset.withdrawalDelete),1);if(write(K.wallet,wallet))render()},true);
+  </script>
+  <script>
+  (() => {
+    if (window.__dabatEmployeeAddon) return;
+    window.__dabatEmployeeAddon = true;
+
+    const employeeKey = 'dabat-employee-users-v1';
+    const employeeSessionKey = 'dabat-active-employee-v1';
+    const safeRead = (key, fallback) => { try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (error) { return fallback; } };
+    const safeWrite = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (error) { return false; } };
+
+    function ensureEmployees() {
+      const current = safeRead(employeeKey, []);
+      if (!Array.isArray(current) || !current.length) {
+        const defaultEmployees = [{ id: 'emp-1', name: 'موظف 1', pin: '1234', role: 'employee', wallet: 0, sales: 0 }];
+        safeWrite(employeeKey, defaultEmployees);
+        return defaultEmployees;
+      }
+      return current;
+    }
+
+    function getEmployeeRecord() {
+      const session = safeRead(employeeSessionKey, null);
+      if (!session || !session.id) return null;
+      const list = ensureEmployees();
+      return list.find((employee) => employee.id === session.id) || null;
+    }
+
+    function renderEmployeeSelect() {
+      const select = document.querySelector('#employee-name');
+      if (!select) return;
+      const employees = ensureEmployees();
+      select.innerHTML = employees.map((employee) => `<option value="${employee.id}">${employee.name}</option>`).join('');
+    }
+
+    function createEmployeeLoginUI() {
+      const loginPanel = document.querySelector('#login-panel');
+      if (!loginPanel || document.getElementById('employee-login-form')) return;
+      loginPanel.insertAdjacentHTML('beforeend', `
+        <div class="panel" style="margin-top:14px;border-top:1px solid var(--line)">
+          <h2>دخول الموظف</h2>
+          <form id="employee-login-form" class="grid">
+            <label>اسم الموظف<select id="employee-name" class="field" name="employeeId"></select></label>
+            <label>رمز PIN<input class="field" type="password" inputmode="numeric" name="employeePin" minlength="4" maxlength="8" required></label>
+            <button class="button full">دخول الموظف</button>
+          </form>
+        </div>
+      `);
+      renderEmployeeSelect();
+
+      document.getElementById('employee-login-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const formData = new FormData(form);
+        const employeeId = String(formData.get('employeeId') || '');
+        const employeePin = String(formData.get('employeePin') || '');
+        const employees = ensureEmployees();
+        const employee = employees.find((item) => item.id === employeeId);
+        if (!employee || String(employee.pin) !== employeePin) {
+          notify('اسم الموظف أو PIN غير صحيح');
+          return;
+        }
+        safeWrite(employeeSessionKey, { id: employee.id, name: employee.name });
+        document.querySelector('#login-panel').classList.add('hidden');
+        document.querySelector('#dashboard').classList.remove('hidden');
+        initEmployeeDashboard(employee);
+      });
+    }
+
+    function initEmployeeDashboard(employee) {
+      const dashboardTabs = document.querySelector('.tabs');
+      if (!dashboardTabs) return;
+      dashboardTabs.innerHTML = `
+        <button class="tab active" data-tab="employee-summary">ملخص الموظف</button>
+        <button class="tab" data-tab="employee-products">منتجاتي</button>
+      `;
+      dashboardTabs.onclick = (event) => {
+        const tab = event.target.closest('[data-tab]');
+        if (!tab) return;
+        document.querySelectorAll('.tab').forEach((button) => button.classList.toggle('active', button === tab));
+        if (tab.dataset.tab === 'employee-summary') {
+          renderEmployeeSummary(employee);
+        } else {
+          renderEmployeeProducts(employee);
+        }
+      };
+      renderEmployeeSummary(employee);
+    }
+
+    function renderEmployeeSummary(employee) {
+      const list = ensureEmployees();
+      const current = list.find((item) => item.id === employee.id) || employee;
+      const totalProducts = products.length;
+      const sales = Number(current.sales || 0);
+      const wallet = Number(current.wallet || 0);
+      document.querySelector('#tab-content').innerHTML = `
+        <h2>ملخص الموظف</h2>
+        <div class="stats">
+          <div class="stat">المحفظة <b>${sar(wallet)}</b></div>
+          <div class="stat">المبيعات <b>${sar(sales)}</b></div>
+          <div class="stat">عدد المنتجات <b>${totalProducts}</b></div>
+        </div>
+        <form id="employee-wallet-form" class="grid" style="margin-top:16px">
+          <label>المحفظة الآنية (SAR)<input class="field" type="number" min="0" step="0.01" name="wallet" value="${Number(current.wallet || 0)}"></label>
+          <label>إجمالي المبيعات (SAR)<input class="field" type="number" min="0" step="0.01" name="sales" value="${Number(current.sales || 0)}"></label>
+          <button class="button full">حفظ بيانات الموظف</button>
+        </form>
+      `;
+      const walletForm = document.getElementById('employee-wallet-form');
+      if (walletForm) {
+        walletForm.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const data = new FormData(event.currentTarget);
+          const updatedEmployees = ensureEmployees().map((item) => {
+            if (item.id !== current.id) return item;
+            return { ...item, wallet: Number(data.get('wallet')) || 0, sales: Number(data.get('sales')) || 0 };
+          });
+          safeWrite(employeeKey, updatedEmployees);
+          notify('تم حفظ ملخص الموظف');
+          renderEmployeeSummary(updatedEmployees.find((item) => item.id === current.id) || updatedEmployees[0]);
+        });
+      }
+    }
+
+    function renderEmployeeProducts(employee) {
+      const current = ensureEmployees().find((item) => item.id === employee.id) || employee;
+      const cats = [...new Set(products.map((product) => product.category).filter(Boolean))];
+      document.querySelector('#tab-content').innerHTML = `
+        <h2>منتجات الموظف</h2>
+        <p class="hint">يمكنك إضافة منتجات جديدة أو حذفها فقط؛ لا توجد صلاحيات أخرى.</p>
+        <form id="employee-product-form" class="grid">
+          <label>اسم المنتج<input class="field" name="title" required maxlength="160"></label>
+          <label>القسم<select class="field" name="category">${cats.map((cat) => `<option>${cat}</option>`).join('') || '<option>منتجات أخرى</option>'}</select></label>
+          <label>السعر (SAR)<input class="field" name="price" type="number" step="0.01" min="0" required></label>
+          <label>العدد المتوفر<input class="field" name="quantity" type="number" min="0" value="1" required></label>
+          <label class="full">وصف المنتج<textarea class="field" name="description" required></textarea></label>
+          <label class="full">رابط الصورة (اختياري)<input class="field" name="imageUrl" type="url" placeholder="https://..."></label>
+          <button class="button full">إضافة المنتج</button>
+        </form>
+        <h3>المنتجات الحالية (${products.length})</h3>
+        <div class="list">${products.map((product) => `
+          <article class="item">
+            <h3>${product.title}</h3>
+            <p>${product.category} · ${sar(product.price)} · ${product.quantity} متوفر</p>
+            <p>${product.description}</p>
+            <div class="row">
+              <button class="button danger small" data-employee-delete="${product.id}">حذف</button>
+            </div>
+          </article>
+        `).join('') || '<p class="muted">لا توجد منتجات حالياً.</p>'}</div>
+      `;
+
+      document.getElementById('employee-product-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        const product = {
+          id: crypto.randomUUID(),
+          title: String(data.get('title') || '').trim(),
+          category: String(data.get('category') || 'منتجات أخرى').trim(),
+          price: Number(data.get('price')) || 0,
+          quantity: Number(data.get('quantity')) || 0,
+          description: String(data.get('description') || '').trim(),
+          image: String(data.get('imageUrl') || '').trim(),
+          inStock: (Number(data.get('quantity')) || 0) > 0
+        };
+        if (!product.title || !product.description || product.price <= 0) {
+          notify('أدخل اسم المنتج، الوصف والسعر بشكل صحيح');
+          return;
+        }
+        products.unshift(product);
+        if (write(K.products, products)) {
+          const updatedEmployees = ensureEmployees().map((item) => item.id === current.id ? { ...item, wallet: Number(item.wallet || 0) + product.price * 0.1, sales: Number(item.sales || 0) + product.price } : item);
+          safeWrite(employeeKey, updatedEmployees);
+          notify('تم إضافة المنتج');
+          renderEmployeeProducts(updatedEmployees.find((item) => item.id === current.id) || current);
+        }
+      });
+
+      document.getElementById('tab-content').addEventListener('click', (event) => {
+        const button = event.target.closest('[data-employee-delete]');
+        if (!button) return;
+        const targetId = button.dataset.employeeDelete;
+        const index = products.findIndex((product) => product.id === targetId);
+        if (index < 0) return;
+        if (!confirm('هل تريد حذف المنتج؟')) return;
+        products.splice(index, 1);
+        if (write(K.products, products)) {
+          const updatedEmployees = ensureEmployees().map((item) => item.id === current.id ? { ...item, wallet: Number(item.wallet || 0) - 0.1 * Number(products[index]?.price || 0), sales: Number(item.sales || 0) } : item);
+          safeWrite(employeeKey, updatedEmployees);
+          notify('تم حذف المنتج');
+          renderEmployeeProducts(updatedEmployees.find((item) => item.id === current.id) || current);
+        }
+      });
+    }
+
+    const originalRenderAppearance = window.renderAppearance;
+    window.renderAppearance = function () {
+      if (typeof originalRenderAppearance === 'function') originalRenderAppearance();
+      const form = document.querySelector('#settings-form');
+      if (!form || form.dataset.dabatExtraVideo) return;
+      form.dataset.dabatExtraVideo = '1';
+      if (!form.querySelector('[name="aboutText"]')) {
+        form.insertAdjacentHTML('beforeend', `
+          <label class="full">من نحن<textarea class="field" name="aboutText">${esc(settings.about || '')}</textarea></label>
+          <label class="full">سياسة الشحن<textarea class="field" name="shippingText">${esc(settings.shipping || '')}</textarea></label>
+          <label class="full">سياسة الإرجاع<textarea class="field" name="returnsText">${esc(settings.returns || '')}</textarea></label>
+          <label class="full">الشروط والأحكام<textarea class="field" name="termsText">${esc(settings.terms || '')}</textarea></label>
+          <label class="full">رابط فيديو كتيك (ملف محلي)<input class="field" type="file" name="videoFile" accept="video/*"></label>
+          <label class="full">رابط فيديو من YouTube أو URL آخر<input class="field" type="url" name="videoUrl" value="${esc(settings.heroVideo || settings.footerVideo || '')}" placeholder="https://www.youtube.com/watch?v=..."></label>
+        `);
+      }
+      form.addEventListener('submit', async (event) => {
+        const target = event.currentTarget;
+        const videoFile = target.elements.videoFile?.files?.[0];
+        const videoUrl = String(target.elements.videoUrl?.value || '').trim();
+        if (videoFile) {
+          const raw = await fileVal(target, 'videoFile');
+          settings.heroVideo = raw;
+          settings.footerVideo = raw;
+        } else if (videoUrl) {
+          settings.heroVideo = videoUrl;
+          settings.footerVideo = videoUrl;
+        }
+        if (target.elements.aboutText) settings.about = String(target.elements.aboutText.value || '').trim();
+        if (target.elements.shippingText) settings.shipping = String(target.elements.shippingText.value || '').trim();
+        if (target.elements.returnsText) settings.returns = String(target.elements.returnsText.value || '').trim();
+        if (target.elements.termsText) settings.terms = String(target.elements.termsText.value || '').trim();
+        write(K.settings, settings);
+      }, { once: false });
+    };
+
+    createEmployeeLoginUI();
+    const renderStoreControlsWithAdSettings = renderStoreControls;
+    renderStoreControls = function () {
+      renderStoreControlsWithAdSettings();
+      const settingsForm = document.querySelector("#store-controls");
+      if (!settingsForm) return;
+      settingsForm.insertAdjacentHTML("afterend", `<section class="panel"><h3>إعدادات الإعلان</h3><form id="ad-availability-form" class="grid"><label class="full"><span>إظهار حقول الصور ورابط الفيديو للعميل <input type="checkbox" name="adMediaUpload" ${settings.visibility?.adMediaUpload === true ? "checked" : ""}></span></label><label class="full">مدد الإعلان المتاحة (مدة واحدة في كل سطر)<textarea class="field" name="adDurations" required>${esc((settings.adDurations || base.adDurations).join("\n"))}</textarea></label><p class="hint full">عند إيقاف خيار الوسائط تختفي حقول الصور ورابط الفيديو من نماذج الإعلان.</p><button class="button full">حفظ إعدادات الإعلان</button></form></section>`);
+      document.querySelector("#ad-availability-form").onsubmit = (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const data = new FormData(form);
+        const durations = [...new Set(String(data.get("adDurations") || "").split("\n").map(value => value.trim()).filter(Boolean))];
+        if (!durations.length || durations.length > 12 || durations.some(value => value.length > 40)) {
+          notify("أدخل من 1 إلى 12 مدة، على ألا يتجاوز كل خيار 40 حرفاً");
+          return;
+        }
+        settings.adDurations = durations;
+        settings.visibility = { ...(settings.visibility || {}), adMediaUpload: form.elements.adMediaUpload.checked };
+        if (write(K.settings, settings)) notify("تم حفظ إعدادات الإعلان");
+      };
+    };
+    const renderAppearanceWithIndexedMedia = renderAppearance;
+    renderAppearance = function () {
+      renderAppearanceWithIndexedMedia();
+      const hint = [...document.querySelectorAll("#tab-content .hint")].find(item => item.textContent.includes("localStorage"));
+      if (hint) hint.textContent = "تُحفظ الملفات المرفوعة في قاعدة بيانات المتصفح، وتُضغط الصور تلقائياً قبل التخزين. تأكد من استخدام النطاق والمتصفح نفسيهما في واجهة العميل.";
+      const form = document.querySelector("#media-form");
+      if (!form) return;
+      const previews = document.createElement("section");
+      previews.className = "panel";
+      const previewTitle = document.createElement("h3");
+      previewTitle.textContent = "معاينة الوسائط المحفوظة";
+      const previewGrid = document.createElement("div");
+      previewGrid.className = "grid";
+      previews.append(previewTitle, previewGrid);
+      const addPreview = (label, source, isVideo) => {
+        const item = document.createElement("article");
+        item.className = "item";
+        const heading = document.createElement("b");
+        heading.textContent = label;
+        item.append(heading);
+        if (source) {
+          if (isVideo && /^https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\//i.test(source)) {
+            const link = document.createElement("a");
+            link.href = source;
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.textContent = "فتح رابط الفيديو";
+            item.append(link);
+          } else {
+            const media = document.createElement(isVideo ? "video" : "img");
+            media.src = source;
+            media.style.maxWidth = "100%";
+            media.style.maxHeight = "220px";
+            media.style.objectFit = "contain";
+            if (isVideo) {
+              media.controls = true;
+              media.muted = true;
+              media.autoplay = true;
+              media.loop = true;
+              media.playsInline = true;
+              media.setAttribute("muted", "");
+              media.setAttribute("autoplay", "");
+              media.setAttribute("loop", "");
+              media.setAttribute("playsinline", "");
+            }
+            item.append(media);
+          }
+        } else {
+          const empty = document.createElement("p");
+          empty.textContent = "لا توجد وسائط محفوظة";
+          item.append(empty);
+        }
+        previewGrid.append(item);
+      };
+      addPreview("وسائط رأس الصفحة", settings.heroVideo || settings.heroImages?.[0] || settings.heroImage, Boolean(settings.heroVideo));
+      addPreview("وسائط أسفل الصفحة", settings.footerVideo || settings.footerImages?.[0] || settings.footerImage, Boolean(settings.footerVideo));
+      form.after(previews);
+      form.onsubmit = async event => {
+        event.preventDefault();
+        try {
+          const upload = name => fileVal(form, name);
+          const [heroImage, heroVideo, footerImage, footerVideo, turbo, crackle, motorcycle] = await Promise.all([
+            upload("heroImage"),
+            upload("heroVideoFile"),
+            upload("footerImageFile"),
+            upload("footerVideoFile"),
+            upload("turboFile"),
+            upload("crackleFile"),
+            upload("motorcycleFile")
+          ]);
+          if (heroImage) settings.heroImages = [...(settings.heroImages || []), heroImage];
+          if (heroVideo) settings.heroVideo = heroVideo;
+          if (footerImage) settings.footerImage = footerImage;
+          if (footerVideo) settings.footerVideo = footerVideo;
+          settings.audio = {
+            ...settings.audio,
+            turbo: turbo || settings.audio?.turbo,
+            crackle: crackle || settings.audio?.crackle,
+            motorcycle: motorcycle || settings.audio?.motorcycle
+          };
+          if (write(K.settings, settings)) {
+            notify("تم حفظ الوسائط");
+            render();
+          }
+        } catch (error) {
+          console.error("تعذر حفظ الوسائط المرفوعة", error);
+          notify(error.message || "تعذر حفظ الوسائط");
+        }
+      };
+    };
+    const renderBlogWithMediaPreview = renderBlog;
+    renderBlog = function () {
+      renderBlogWithMediaPreview();
+      const cards = document.querySelectorAll("#tab-content .list > .item");
+      blogs.forEach((blog, index) => {
+        const card = cards[index];
+        if (!card) return;
+        if (blog.image) {
+          const image = document.createElement("img");
+          image.src = blog.image;
+          image.alt = `صورة ${blog.title || "المقال"}`;
+          image.style.maxWidth = "220px";
+          image.style.maxHeight = "160px";
+          image.style.objectFit = "contain";
+          card.prepend(image);
+        }
+        if (blog.video) {
+          const video = document.createElement("video");
+          video.src = blog.video;
+          video.controls = true;
+          video.style.maxWidth = "320px";
+          card.append(video);
+        }
+      });
+    };
+    window.DabatMediaStore.migrateLocalStorageKeys([K.settings, K.products, K.orders, K.ads, K.requests, K.blog]).then(keys => {
+      if (!keys.length) return;
+      settings = { ...base, ...read(K.settings, {}) };
+      products = read(K.products, defaultProducts);
+      orders = read(K.orders, []);
+      ads = read(K.ads, []);
+      requests = read(K.requests, []);
+      blogs = read(K.blog, []);
+      if (!document.querySelector("#dashboard").classList.contains("hidden")) render();
+    }).catch(error => {
+      console.error("تعذر نقل الوسائط القديمة إلى قاعدة البيانات", error);
+      notify("تعذر نقل الوسائط القديمة. تحقق من مساحة المتصفح ثم أعد تحميل الصفحة.");
+    });
+  })();
+  </script>
+</body>
+</html>

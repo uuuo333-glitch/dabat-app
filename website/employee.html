@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#11100d">
+  <title>لوحة الموظف</title>
+  <style>
+    :root { --bg: #11100d; --surface: #1b1914; --card: #242117; --gold: #d8b456; --gold2: #f3dda0; --text: #f6f1e5; --muted: #aaa28e; --line: #49412c; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: Tahoma, Arial, sans-serif; line-height: 1.8; }
+    a, button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; color: inherit; }
+    .shell { width: min(1100px, calc(100% - 24px)); margin: auto; }
+    .panel { margin: 20px auto; padding: 20px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+    .button { border: 1px solid transparent; border-radius: 10px; background: var(--gold); color: #17140b; padding: 10px 16px; font-weight: 700; }
+    .button.outline { border-color: var(--line); background: transparent; color: var(--gold2); }
+    .button.danger { background: #56221d; color: #ffd9d1; }
+    .field { width: 100%; border: 1px solid var(--line); border-radius: 8px; background: #12110e; color: var(--text); padding: 10px; }
+    .field:focus { outline: 2px solid rgba(216,180,86,0.4); }
+    label { display: grid; gap: 6px; color: var(--gold2); font-size: 0.9rem; }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .full { grid-column: 1 / -1; }
+    header { border-bottom: 1px solid var(--line); background: rgba(17,16,13,0.95); }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; }
+    .brand { font-size: 1.3rem; color: var(--gold2); font-weight: 700; }
+    .muted { color: var(--muted); }
+    .hint { border-right: 3px solid var(--gold); background: rgba(41,36,22,0.9); color: var(--muted); padding: 10px; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .stat { padding: 16px; border: 1px solid var(--line); border-radius: 12px; }
+    .list { display: grid; gap: 10px; }
+    .item { padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #15140f; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .hidden { display: none !important; }
+    @media (max-width: 700px) { .grid, .stats { grid-template-columns: 1fr; } .topbar { flex-direction: column; align-items: flex-start; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell topbar">
+      <div class="brand" id="employee-brand">لوحة الموظف</div>
+      <div class="row">
+        <a class="button outline" href="admin.html">المالك</a>
+        <button class="button outline" id="logout-employee">تسجيل الخروج</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="employee-login-panel" class="panel">
+      <h2>دخول الموظف</h2>
+      <form id="employee-login-form" class="grid">
+        <label class="full">اسم الموظف (اختياري)
+          <input class="field" type="text" name="employeeName" placeholder="اكتب اسم الموظف أو اتركه فارغاً" value="">
+        </label>
+        <label class="full">رمز PIN
+          <input class="field" type="password" name="employeePin" minlength="4" maxlength="8" inputmode="numeric" required>
+        </label>
+        <button class="button full">دخول الموظف</button>
+      </form>
+    </section>
+
+    <section id="employee-dashboard" class="hidden">
+      <div class="panel">
+        <h2>إدارة المتجر الخاص</h2>
+        <form id="employee-settings-form" class="grid">
+          <label>اسم المتجر الخاص<input class="field" name="storeName" required></label>
+          <label>لون الثيم الأساسي<input class="field" name="themeAccent" type="color"></label>
+          <label>خلفية الصفحة<input class="field" name="themeBg" type="color"></label>
+          <label>لون النص<input class="field" name="themeText" type="color"></label>
+          <label class="full">PayPal / رابط الدفع (اختياري)<input class="field" name="paypal" placeholder="https://paypal.me/..." value=""></label>
+          <label>اسم البنك<input class="field" name="bankName" placeholder="بنك ..."></label>
+          <label class="full">IBAN / رقم الحساب<input class="field" name="iban" placeholder=""></label>
+          <label>واتساب المتجر<input class="field" name="whatsapp" placeholder="9665..." value=""></label>
+          <label>إنستغرام<input class="field" name="instagram" placeholder="https://instagram.com/..." value=""></label>
+          <label>تيك توك<input class="field" name="tiktok" placeholder="https://tiktok.com/..." value=""></label>
+          <label>سناب شات<input class="field" name="snapchat" placeholder="https://snapchat.com/..." value=""></label>
+          <label>فيسبوك<input class="field" name="facebook" placeholder="https://facebook.com/..." value=""></label>
+          <label>يوتيوب<input class="field" name="youtube" placeholder="https://youtube.com/..." value=""></label>
+          <label class="full">نص أسفل الصفحة<input class="field" name="footerText" placeholder="أهلاً بكم ..." value=""></label>
+          <label class="full">من نحن / الوصف المختصر<input class="field" name="aboutText" placeholder="نقدم لكم ..." value=""></label>
+          <button class="button full">حفظ إعدادات المتجر</button>
+        </form>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="muted">المحفظة</div><b id="employee-wallet">0</b></div>
+        <div class="stat"><div class="muted">المبيعات</div><b id="employee-sales">0</b></div>
+        <div class="stat"><div class="muted">عدد المنتجات</div><b id="employee-products-count">0</b></div>
+      </div>
+
+      <div class="panel">
+        <h2>تسجيل بيع جديد</h2>
+        <form id="employee-order-form" class="grid">
+          <label>اسم العميل<input class="field" name="customerName" required></label>
+          <label>المبلغ (SAR)<input class="field" name="amount" type="number" min="0" step="0.01" required></label>
+          <label>طريقة الدفع<select class="field" name="paymentMethod" id="employee-payment-method"></select></label>
+          <label>ملاحظة<select class="field" name="methodType"><option value="إيصال إلكتروني">إيصال إلكتروني</option><option value="تحويل بنكي">تحويل بنكي</option></select></label>
+          <button class="button full">تسجيل البيع</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>إضافة منتج</h2>
+        <form id="employee-product-form" class="grid">
+          <label>اسم المنتج<input class="field" name="title" required></label>
+          <label>السعر (SAR)<input class="field" name="price" type="number" min="0" step="0.01" required></label>
+          <label>الكمية<input class="field" name="quantity" type="number" min="0" value="1" required></label>
+          <label class="full">الوصف<textarea class="field" name="description" required></textarea></label>
+          <label class="full">رابط الصورة (اختياري)<input class="field" name="image" type="url" placeholder="https://..."></label>
+          <button class="button full">إضافة المنتج</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2>منتجات الموظف</h2>
+        <div id="employee-products-list" class="list"></div>
+      </div>
+
+      <div class="panel">
+        <h2>سجل المبيعات</h2>
+        <div id="employee-sales-list" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+    const EMPLOYEES_KEY = "dabat-employee-users-v1";
+    const EMPLOYEE_PRODUCTS_KEY = "dabat-employee-products-v1";
+    const EMPLOYEE_ORDERS_KEY = "dabat-employee-orders-v1";
+    const ACTIVE_EMPLOYEE_KEY = "dabat-active-employee-v1";
+
+    const read = (key, fallback) => { try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (error) { return fallback; } };
+    const write = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (error) { return false; } };
+    const fmt = (value) => new Intl.NumberFormat("ar-SA", { style: "currency", currency: "SAR", maximumFractionDigits: 0 }).format(Number(value) || 0);
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
+
+    function getEmployees() {
+      const employees = read(EMPLOYEES_KEY, [{ id: "emp-001", name: "موظف 1", pin: "1234", storeName: "متجر الموظف", theme: { bg: "#11100d", accent: "#d8b456", text: "#f6f1e5" }, paypal: "", bankName: "", iban: "", whatsapp: "", socials: { instagram: "", tiktok: "", snapchat: "", x: "", facebook: "", youtube: "" }, footerText: "", aboutText: "", storeOpen: true, blockedServices: [], paymentMethods: { paypal: true, bank: true }, walletEnabled: true, wallet: 0, sales: 0 }]);
+      if (!Array.isArray(employees) || !employees.length) {
+        const fallback = [{ id: "emp-001", name: "موظف 1", pin: "1234", storeName: "متجر الموظف", theme: { bg: "#11100d", accent: "#d8b456", text: "#f6f1e5" }, paypal: "", bankName: "", iban: "", whatsapp: "", socials: { instagram: "", tiktok: "", snapchat: "", x: "", facebook: "", youtube: "" }, footerText: "", aboutText: "", storeOpen: true, blockedServices: [], paymentMethods: { paypal: true, bank: true }, walletEnabled: true, wallet: 0, sales: 0 }];
+        write(EMPLOYEES_KEY, fallback);
+        return fallback;
+      }
+      return employees;
+    }
+
+    function getCurrentEmployee() {
+      const session = read(ACTIVE_EMPLOYEE_KEY, null);
+      if (!session?.id) return null;
+      return getEmployees().find((employee) => employee.id === session.id) || null;
+    }
+
+    function setCurrentEmployee(employee) {
+      write(ACTIVE_EMPLOYEE_KEY, { id: employee.id, name: employee.name });
+    }
+
+    function getProducts(employeeId) {
+      const all = read(EMPLOYEE_PRODUCTS_KEY, {});
+      return Array.isArray(all[employeeId]) ? all[employeeId] : [];
+    }
+
+    function setProducts(employeeId, products) {
+      const all = read(EMPLOYEE_PRODUCTS_KEY, {});
+      all[employeeId] = products;
+      write(EMPLOYEE_PRODUCTS_KEY, all);
+    }
+
+    function getOrders(employeeId) {
+      const all = read(EMPLOYEE_ORDERS_KEY, {});
+      return Array.isArray(all[employeeId]) ? all[employeeId] : [];
+    }
+
+    function setOrders(employeeId, orders) {
+      const all = read(EMPLOYEE_ORDERS_KEY, {});
+      all[employeeId] = orders;
+      write(EMPLOYEE_ORDERS_KEY, all);
+    }
+
+    function renderEmployeeOptions() {
+      const select = document.getElementById("employee-select");
+      if (!select) return;
+      const employees = getEmployees();
+      select.innerHTML = employees.map((employee) => `<option value="${employee.id}">${esc(employee.name || "موظف")}</option>`).join("");
+    }
+
+    function findEmployeeByLogin(name, pin) {
+      const employees = getEmployees();
+      const typedName = String(name || "").trim().toLowerCase();
+      const typedPin = String(pin || "").trim();
+      if (!typedPin) return null;
+      const byPin = employees.filter((employee) => String(employee.pin || "") === typedPin);
+      if (!typedName) {
+        if (byPin.length === 1) return byPin[0];
+        return byPin[0] || null;
+      }
+      const exactMatch = employees.find((employee) => String(employee.name || "").trim().toLowerCase() === typedName);
+      if (exactMatch && String(exactMatch.pin || "") === typedPin) return exactMatch;
+      const singleCandidate = byPin.length === 1 ? byPin[0] : null;
+      return singleCandidate;
+    }
+
+    function applyEmployeeTheme(employee) {
+      const theme = employee?.theme || { bg: "#11100d", accent: "#d8b456", text: "#f6f1e5" };
+      document.documentElement.style.setProperty("--bg", theme.bg || "#11100d");
+      document.documentElement.style.setProperty("--gold", theme.accent || "#d8b456");
+      document.documentElement.style.setProperty("--gold2", theme.accent || "#d8b456");
+      document.documentElement.style.setProperty("--text", theme.text || "#f6f1e5");
+      document.title = employee?.storeName || "لوحة الموظف";
+      document.getElementById("employee-brand").textContent = employee?.storeName || "لوحة الموظف";
+    }
+
+    function renderEmployeeProducts(employee) {
+      const products = getProducts(employee.id);
+      const container = document.getElementById("employee-products-list");
+      if (!container) return;
+      container.innerHTML = products.length ? products.map((product) => `
+        <article class="item">
+          <div class="row"><strong>${esc(product.title)}</strong><button class="button danger" data-delete-product="${product.id}" style="margin-inline-start:auto">حذف</button></div>
+          <p>${esc(product.description)}</p>
+          <p>${fmt(product.price)} · الكمية: ${product.quantity || 0}</p>
+        </article>
+      `).join("") : '<p class="muted">لا توجد منتجات حتى الآن.</p>';
+      const count = document.getElementById("employee-products-count");
+      if (count) count.textContent = String(products.length);
+    }
+
+    function renderEmployeeSales(employee) {
+      const orders = getOrders(employee.id);
+      const salesList = document.getElementById("employee-sales-list");
+      if (!salesList) return;
+      const totalSales = orders.reduce((sum, order) => sum + Number(order.amount || 0), 0);
+      const wallet = Number(employee.wallet || 0) || totalSales;
+      const walletEnabled = employee.walletEnabled !== false;
+      document.getElementById("employee-wallet").textContent = walletEnabled ? fmt(wallet) : "موقوف";
+      document.getElementById("employee-sales").textContent = fmt(totalSales);
+      salesList.innerHTML = orders.length ? orders.map((order) => `
+        <article class="item">
+          <h3>${esc(order.customerName || "عميل" )}</h3>
+          <p>المبلغ: ${fmt(order.amount)} · الدفع: ${esc(order.paymentMethod === "bank" ? "تحويل بنكي" : "PayPal")}</p>
+          <p>التاريخ: ${esc(order.createdAt || "")}</p>
+        </article>
+      `).join("") : '<p class="muted">لا توجد مبيعات مسجلة بعد.</p>';
+    }
+
+    function populateEmployeePaymentOptions(employee) {
+      const select = document.getElementById("employee-payment-method");
+      if (!select) return;
+      const methods = { ...(employee.paymentMethods || { paypal: true, bank: true }) };
+      const enabledMethods = [
+        ["paypal", methods.paypal !== false ? "PayPal" : null],
+        ["bank", methods.bank !== false ? "تحويل بنكي" : null]
+      ].filter(([, label]) => label);
+      if (!enabledMethods.length) {
+        select.innerHTML = '<option value="">لا توجد طرق دفع مفعلة</option>';
+        select.disabled = true;
+        return;
+      }
+      select.disabled = false;
+      select.innerHTML = enabledMethods.map(([value, label]) => `<option value="${value}">${esc(label)}</option>`).join("");
+    }
+
+    function loadEmployeeDashboard(employee) {
+      setCurrentEmployee(employee);
+      applyEmployeeTheme(employee);
+      const settingsForm = document.getElementById("employee-settings-form");
+      settingsForm.elements.storeName.value = employee.storeName || "متجر الموظف";
+      settingsForm.elements.themeAccent.value = employee.theme?.accent || "#d8b456";
+      settingsForm.elements.themeBg.value = employee.theme?.bg || "#11100d";
+      settingsForm.elements.themeText.value = employee.theme?.text || "#f6f1e5";
+      settingsForm.elements.paypal.value = employee.paypal || "";
+      settingsForm.elements.bankName.value = employee.bankName || "";
+      settingsForm.elements.iban.value = employee.iban || "";
+      settingsForm.elements.whatsapp.value = employee.whatsapp || "";
+      settingsForm.elements.instagram.value = employee.socials?.instagram || "";
+      settingsForm.elements.tiktok.value = employee.socials?.tiktok || "";
+      settingsForm.elements.snapchat.value = employee.socials?.snapchat || "";
+      settingsForm.elements.facebook.value = employee.socials?.facebook || "";
+      settingsForm.elements.youtube.value = employee.socials?.youtube || "";
+      settingsForm.elements.footerText.value = employee.footerText || "";
+      settingsForm.elements.aboutText.value = employee.aboutText || "";
+      populateEmployeePaymentOptions(employee);
+      renderEmployeeProducts(employee);
+      renderEmployeeSales(employee);
+    }
+
+    function saveEmployeeFromSettings(employee, formData) {
+      const employees = getEmployees();
+      const nextEmployees = employees.map((item) => item.id === employee.id ? {
+        ...item,
+        storeName: String(formData.get("storeName") || "متجر الموظف").trim(),
+        theme: {
+          bg: String(formData.get("themeBg") || "#11100d").trim(),
+          accent: String(formData.get("themeAccent") || "#d8b456").trim(),
+          text: String(formData.get("themeText") || "#f6f1e5").trim()
+        },
+        paypal: String(formData.get("paypal") || "").trim(),
+        bankName: String(formData.get("bankName") || "").trim(),
+        iban: String(formData.get("iban") || "").trim(),
+        whatsapp: String(formData.get("whatsapp") || "").trim(),
+        socials: {
+          instagram: String(formData.get("instagram") || "").trim(),
+          tiktok: String(formData.get("tiktok") || "").trim(),
+          snapchat: String(formData.get("snapchat") || "").trim(),
+          x: String(formData.get("x") || "").trim(),
+          facebook: String(formData.get("facebook") || "").trim(),
+          youtube: String(formData.get("youtube") || "").trim()
+        },
+        footerText: String(formData.get("footerText") || "").trim(),
+        aboutText: String(formData.get("aboutText") || "").trim()
+      } : item);
+      write(EMPLOYEES_KEY, nextEmployees);
+      const updatedEmployee = nextEmployees.find((item) => item.id === employee.id) || employee;
+      loadEmployeeDashboard(updatedEmployee);
+      return updatedEmployee;
+    }
+
+    document.getElementById("employee-login-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const data = new FormData(event.currentTarget);
+      const employeeName = String(data.get("employeeName") || "");
+      const employeePin = String(data.get("employeePin") || "");
+      const employee = findEmployeeByLogin(employeeName, employeePin);
+      if (!employee) {
+        alert("اسم الموظف أو PIN غير صحيح");
+        return;
+      }
+      document.getElementById("employee-login-panel").classList.add("hidden");
+      document.getElementById("employee-dashboard").classList.remove("hidden");
+      loadEmployeeDashboard(employee);
+    });
+
+    document.getElementById("logout-employee")?.addEventListener("click", () => {
+      localStorage.removeItem(ACTIVE_EMPLOYEE_KEY);
+      window.location.reload();
+    });
+
+    document.getElementById("employee-settings-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const employee = getCurrentEmployee();
+      if (!employee) return;
+      saveEmployeeFromSettings(employee, new FormData(event.currentTarget));
+    });
+
+    document.getElementById("employee-product-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const employee = getCurrentEmployee();
+      if (!employee) return;
+      const data = new FormData(event.currentTarget);
+      const product = {
+        id: crypto.randomUUID(),
+        title: String(data.get("title") || "").trim(),
+        description: String(data.get("description") || "").trim(),
+        price: Number(data.get("price")),
+        quantity: Number(data.get("quantity")) || 0,
+        image: String(data.get("image") || "").trim()
+      };
+      if (!product.title || !product.description || !(product.price > 0)) {
+        alert("أدخل اسم المنتج ووصفه وسعره بشكل صحيح");
+        return;
+      }
+      const products = getProducts(employee.id);
+      products.unshift(product);
+      setProducts(employee.id, products);
+      event.currentTarget.reset();
+      renderEmployeeProducts(employee);
+      document.getElementById("employee-products-count").textContent = String(products.length);
+    });
+
+    document.getElementById("employee-products-list")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-delete-product]");
+      if (!button) return;
+      const employee = getCurrentEmployee();
+      if (!employee) return;
+      const products = getProducts(employee.id).filter((product) => product.id !== button.dataset.deleteProduct);
+      setProducts(employee.id, products);
+      renderEmployeeProducts(employee);
+    });
+
+    document.getElementById("employee-order-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const employee = getCurrentEmployee();
+      if (!employee) return;
+      const data = new FormData(event.currentTarget);
+      const amount = Number(data.get("amount")) || 0;
+      const paymentMethod = String(data.get("paymentMethod") || "");
+      const methods = employee.paymentMethods || { paypal: true, bank: true };
+      if (!paymentMethod || (paymentMethod === "paypal" && methods.paypal === false) || (paymentMethod === "bank" && methods.bank === false)) {
+        alert("طريقة الدفع المحددة غير مفعلة من قبل المالك");
+        return;
+      }
+      const order = {
+        id: crypto.randomUUID(),
+        customerName: String(data.get("customerName") || "").trim(),
+        amount,
+        paymentMethod,
+        createdAt: new Date().toLocaleString("ar-SA"),
+        methodType: String(data.get("methodType") || "")
+      };
+      if (!order.customerName || amount <= 0) {
+        alert("أدخل اسم العميل ومبلغ البيع بشكل صحيح");
+        return;
+      }
+      const orders = getOrders(employee.id);
+      orders.unshift(order);
+      setOrders(employee.id, orders);
+      const walletEnabled = employee.walletEnabled !== false;
+      const nextWallet = walletEnabled ? Number(employee.wallet || 0) + amount : Number(employee.wallet || 0);
+      const employees = getEmployees().map((item) => item.id === employee.id ? { ...item, wallet: nextWallet, sales: Number(item.sales || 0) + amount, paymentMethods: { ...methods } } : item);
+      write(EMPLOYEES_KEY, employees);
+      renderEmployeeSales({ ...employee, wallet: nextWallet, sales: Number(employee.sales || 0) + amount, walletEnabled, paymentMethods: { ...methods } });
+      event.currentTarget.reset();
+      populateEmployeePaymentOptions({ ...employee, paymentMethods: { ...methods }, walletEnabled });
+    });
+
+    renderEmployeeOptions();
+    const activeEmployee = getCurrentEmployee();
+    if (activeEmployee) {
+      document.getElementById("employee-login-panel").classList.add("hidden");
+      document.getElementById("employee-dashboard").classList.remove("hidden");
+      loadEmployeeDashboard(activeEmployee);
+    }
+  </script>
+</body>
+</html>
