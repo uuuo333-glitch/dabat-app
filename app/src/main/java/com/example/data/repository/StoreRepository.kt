@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.util.Patterns
 import com.example.data.model.Complaint
 import com.example.data.model.CommercialAdDurationUnit
 import com.example.data.model.CommercialStoreAd
@@ -349,6 +350,7 @@ class StoreRepository private constructor(private val context: Context) {
   }
 
   fun authenticateOwner(
+    email: String,
     password: String,
     createAccount: Boolean,
     onComplete: (OwnerAuthenticationResult) -> Unit
@@ -358,13 +360,22 @@ class StoreRepository private constructor(private val context: Context) {
       onComplete(OwnerAuthenticationResult(false, "خدمة تسجيل الدخول غير متاحة. تحقق من إعداد Firebase."))
       return
     }
+    val normalizedEmail = email.trim()
+    if (!Patterns.EMAIL_ADDRESS.matcher(normalizedEmail).matches()) {
+      onComplete(OwnerAuthenticationResult(false, "أدخل بريداً إلكترونياً صالحاً."))
+      return
+    }
+    if (!normalizedEmail.equals(OWNER_EMAIL, ignoreCase = true)) {
+      onComplete(OwnerAuthenticationResult(false, "البريد الإلكتروني غير معتمد لحساب المالك."))
+      return
+    }
     if (password.length < 6) {
       onComplete(OwnerAuthenticationResult(false, "كلمة المرور يجب ألا تقل عن 6 أحرف."))
       return
     }
 
     if (createAccount) {
-      auth.createUserWithEmailAndPassword(OWNER_EMAIL, password)
+      auth.createUserWithEmailAndPassword(normalizedEmail, password)
         .addOnSuccessListener { result ->
           val user = result.user
           if (user == null || !user.email.equals(OWNER_EMAIL, ignoreCase = true)) {
@@ -378,7 +389,7 @@ class StoreRepository private constructor(private val context: Context) {
               onComplete(
                 OwnerAuthenticationResult(
                   false,
-                  "تم إنشاء الحساب. افتح رسالة التحقق المرسلة إلى $OWNER_EMAIL ثم سجّل الدخول."
+                  "تم إنشاء الحساب. افتح رسالة التحقق المرسلة إلى البريد المعتمد ثم سجّل الدخول."
                 )
               )
             }
@@ -405,7 +416,7 @@ class StoreRepository private constructor(private val context: Context) {
       return
     }
 
-    auth.signInWithEmailAndPassword(OWNER_EMAIL, password)
+    auth.signInWithEmailAndPassword(normalizedEmail, password)
       .addOnSuccessListener { result ->
         val user = result.user
         when {
@@ -451,7 +462,7 @@ class StoreRepository private constructor(private val context: Context) {
                   onComplete(
                     OwnerAuthenticationResult(
                       false,
-                      "تم إرسال رمز التحقق إلى $OWNER_EMAIL. أدخله لإكمال الدخول.",
+                      "تم إرسال رمز التحقق إلى البريد المعتمد. أدخله لإكمال الدخول.",
                       challengeId
                     )
                   )
@@ -528,19 +539,24 @@ class StoreRepository private constructor(private val context: Context) {
       }
   }
 
-  fun sendOwnerPasswordReset(onComplete: (String) -> Unit) {
+  fun sendOwnerPasswordReset(email: String, onComplete: (String) -> Unit) {
     val auth = firebaseAuth
     if (auth == null) {
       onComplete("خدمة تسجيل الدخول غير متاحة. تحقق من إعداد Firebase.")
       return
     }
-    auth.sendPasswordResetEmail(OWNER_EMAIL)
+    val normalizedEmail = email.trim()
+    if (!Patterns.EMAIL_ADDRESS.matcher(normalizedEmail).matches()) {
+      onComplete("أدخل بريداً إلكترونياً صالحاً لإرسال رابط الاستعادة.")
+      return
+    }
+    auth.sendPasswordResetEmail(normalizedEmail)
       .addOnSuccessListener {
-        onComplete("إذا كان الحساب مسجلاً، ستصلك رسالة تعيين كلمة مرور على $OWNER_EMAIL.")
+        onComplete("تم إرسال رابط استعادة كلمة المرور إلى البريد المدخل. تحقق من البريد الوارد ومجلد الرسائل غير المرغوب فيها.")
       }
       .addOnFailureListener { error ->
         Log.e(TAG, "Failed to send owner password reset", error)
-        onComplete("تعذر إرسال رسالة تعيين كلمة المرور: ${error.localizedMessage ?: "خطأ غير معروف"}")
+        onComplete("تعذر إرسال رسالة تعيين كلمة المرور. تحقق من إعدادات Firebase واتصال الإنترنت ثم حاول مجدداً.")
       }
   }
 

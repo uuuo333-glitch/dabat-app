@@ -130,9 +130,9 @@ fun OwnerAdminPortal(
   ownerWalletTransactions: List<OwnerWalletTransaction>,
   ownerWalletLoading: Boolean,
   ownerWalletError: String?,
-  onAuthenticateOwner: (String, Boolean, (OwnerAuthenticationResult) -> Unit) -> Unit,
+  onAuthenticateOwner: (String, String, Boolean, (OwnerAuthenticationResult) -> Unit) -> Unit,
   onVerifyOwnerCode: (String, String, (Boolean, String) -> Unit) -> Unit,
-  onResetOwnerPassword: ((String) -> Unit) -> Unit,
+  onResetOwnerPassword: (String, (String) -> Unit) -> Unit,
   onLogout: () -> Unit,
   onUpdateSettings: (StoreSettings) -> Unit,
   onAddProduct: (Product) -> Unit,
@@ -155,6 +155,7 @@ fun OwnerAdminPortal(
   val scope = rememberCoroutineScope()
 
   var ownerPasswordInput by remember { mutableStateOf("") }
+  var ownerEmailInput by remember { mutableStateOf("") }
   var ownerOtpInput by remember { mutableStateOf("") }
   var ownerLoginChallengeId by remember { mutableStateOf<String?>(null) }
   var isOwnerAuthenticating by remember { mutableStateOf(false) }
@@ -206,6 +207,8 @@ fun OwnerAdminPortal(
         if (!isOwnerLoggedIn) {
           // Owner Login Gate
           OwnerLoginGate(
+            emailInput = ownerEmailInput,
+            onEmailChange = { ownerEmailInput = it },
             passwordInput = ownerPasswordInput,
             onPasswordChange = { ownerPasswordInput = it },
             otpInput = ownerOtpInput,
@@ -215,7 +218,7 @@ fun OwnerAdminPortal(
             onPasswordReset = {
               if (!isOwnerAuthenticating) {
                 isOwnerAuthenticating = true
-                onResetOwnerPassword { message ->
+                onResetOwnerPassword(ownerEmailInput) { message ->
                   isOwnerAuthenticating = false
                   Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                 }
@@ -238,7 +241,7 @@ fun OwnerAdminPortal(
             onAuthenticationAttempt = { createAccount ->
               if (!isOwnerAuthenticating) {
                 isOwnerAuthenticating = true
-                onAuthenticateOwner(ownerPasswordInput, createAccount) { result ->
+                onAuthenticateOwner(ownerEmailInput, ownerPasswordInput, createAccount) { result ->
                   isOwnerAuthenticating = false
                   if (result.challengeId != null) {
                     ownerLoginChallengeId = result.challengeId
@@ -330,6 +333,8 @@ fun OwnerAdminPortal(
 
 @Composable
 private fun OwnerLoginGate(
+  emailInput: String,
+  onEmailChange: (String) -> Unit,
   passwordInput: String,
   onPasswordChange: (String) -> Unit,
   otpInput: String,
@@ -381,7 +386,7 @@ private fun OwnerLoginGate(
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-          text = "البريد المعتمد للمالك: uuuo333@gmail.com. في أول استخدام أنشئ الحساب وحدد كلمة مرور، ثم أكد بريدك الإلكتروني.",
+          text = "في أول استخدام أنشئ حساب المالك وحدد كلمة مرور، ثم أكد البريد الإلكتروني.",
           fontSize = 12.sp,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
           textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -416,6 +421,18 @@ private fun OwnerLoginGate(
             Text("إرسال رمز جديد")
           }
         } else {
+          OutlinedTextField(
+            value = emailInput,
+            onValueChange = onEmailChange,
+            label = { Text("البريد الإلكتروني") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(10.dp)
+          )
+
+          Spacer(modifier = Modifier.height(8.dp))
+
           OutlinedTextField(
             value = passwordInput,
             onValueChange = onPasswordChange,

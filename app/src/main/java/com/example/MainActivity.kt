@@ -574,14 +574,14 @@ fun StoreMainScreen(
       ownerWalletTransactions = ownerWalletTransactions,
       ownerWalletLoading = ownerWalletLoading,
       ownerWalletError = ownerWalletError,
-      onAuthenticateOwner = { password, createAccount, onComplete ->
-        repository.authenticateOwner(password, createAccount, onComplete)
+      onAuthenticateOwner = { email, password, createAccount, onComplete ->
+        repository.authenticateOwner(email, password, createAccount, onComplete)
       },
       onVerifyOwnerCode = { challengeId, code, onComplete ->
         repository.verifyOwnerLoginCode(challengeId, code, onComplete)
       },
-      onResetOwnerPassword = { onComplete ->
-        repository.sendOwnerPasswordReset(onComplete)
+      onResetOwnerPassword = { email, onComplete ->
+        repository.sendOwnerPasswordReset(email, onComplete)
       },
       onLogout = { repository.logout() },
       onUpdateSettings = { repository.updateStoreSettings(it) },

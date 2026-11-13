@@ -1,27 +1,29 @@
 {
   "project_info": {
-    "project_id": "remixed-project-id",
-    "project_number": "1234567890"
+    "project_number": "862679566974",
+    "project_id": "planning-with-ai-98343",
+    "storage_bucket": "planning-with-ai-98343.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1234567890:android:remixedappid",
+        "mobilesdk_app_id": "1:862679566974:android:9db28ec9ef1da364e9262f",
         "android_client_info": {
           "package_name": "com.aistudio.applet.luelwf"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1234567890-examplewebclientid.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "remixed-api-key"
+          "current_key": "AIzaSyB3FuxY8PwDya8VmVzXSBSFfLC7WZIF1z4"
         }
-      ]
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
-  ]
+  ],
+  "configuration_version": "1"
 }
